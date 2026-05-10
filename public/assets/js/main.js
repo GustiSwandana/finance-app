@@ -1,43 +1,9 @@
 $(function () {
   //search
   $(document).on("keydown", (e) => {
-    switch (e.key) {
-      case "k":
-      case "Control":
-        e.preventDefault();
-        e.stopPropagation();
-        break;
-    }
-    ``;
     if (e.key === "k" && e.ctrlKey) {
+      e.preventDefault();
       $("#search").trigger("focus");
-    }
-  });
-  //drawer
-  $(".drawer-btn").on("click", () => {
-    const checkClassExits = $(".layout-wrapper");
-    if (checkClassExits.hasClass("active")) {
-      checkClassExits.removeClass("active");
-    } else {
-      checkClassExits.addClass("active");
-    }
-  });
-  //drawer key access
-  $(document).on("keydown", (e) => {
-    switch (e.key) {
-      case "b":
-      case "Control":
-        e.preventDefault();
-        e.stopPropagation();
-        break;
-    }
-    if (e.key === "b" && e.ctrlKey) {
-      const checkClassExits = $(".layout-wrapper");
-      if (checkClassExits.hasClass("active")) {
-        checkClassExits.removeClass("active");
-      } else {
-        checkClassExits.addClass("active");
-      }
     }
   });
 });
@@ -291,19 +257,20 @@ navSubmenu();
 
   // Toggle the theme when the button is clicked
   var themeToggle = document.getElementById('theme-toggle');
-  themeToggle.addEventListener('click', function() {
-    // Check the current theme and toggle it
-    if (localStorage.theme === 'dark') {
-      localStorage.theme = 'light';
-    } else {
-      localStorage.theme = 'dark';
-    }
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      // Check the current theme and toggle it
+      if (localStorage.theme === 'dark') {
+        localStorage.theme = 'light';
+      } else {
+        localStorage.theme = 'dark';
+      }
 
-    // Apply the new theme
-    if (localStorage.theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  });
-
+      // Apply the new theme
+      if (localStorage.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+  }

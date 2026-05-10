@@ -36,7 +36,9 @@ body {
 
 .layout-wrapper .sidebar-wrapper {
   left: -308px;
-  transition: left 0.5s ease-in-out;
+  display: block;
+  z-index: 60;
+  transition: left 0.24s ease-in-out;
 }
 .layout-wrapper.active .sidebar-wrapper {
   left: 0;
@@ -48,32 +50,38 @@ body {
 .layout-wrapper.active .sidebar-wrapper-collapse {
   left: -120px;
 }
-.layout-wrapper .body-wrapper {
-  /*margin-left: 96px;*/
-  transition: margin-left 0.5s ease-in-out;
-}
+.layout-wrapper .body-wrapper,
 .layout-wrapper.active .body-wrapper {
-  margin-left: 208px;
+  margin-left: 0;
+  transition: margin-left 0.24s ease-in-out;
 }
 .upgrade-wrapper .upgrade-banner {
   background-repeat: no-repeat;
   background-size: cover;
 }
-.layout-wrapper.active .body-wrapper .drawer-btn {
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-}
 .layout-wrapper .body-wrapper .drawer-btn {
-  opacity: 100;
-  transition: opacity 0.5s ease-in-out;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.24s ease-in-out;
 }
+.layout-wrapper .body-wrapper .header-wrapper,
 .layout-wrapper.active .body-wrapper .header-wrapper {
-  width: calc(100% - 308px);
-  transition: width 0.5s ease-in-out;
+  left: 0;
+  width: 100%;
+  transition: left 0.24s ease-in-out, width 0.24s ease-in-out;
 }
-.layout-wrapper .body-wrapper .header-wrapper {
-  width: calc(100% - 96px);
-  transition: width 0.5s ease-in-out;
+@media (min-width: 1280px) {
+  .layout-wrapper.active .body-wrapper {
+    margin-left: 308px;
+  }
+  .layout-wrapper.active .body-wrapper .header-wrapper {
+    left: 308px;
+    width: calc(100% - 308px);
+  }
+  .layout-wrapper.active .body-wrapper .header-wrapper .drawer-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 .progess-bar .bonus-per .bonus-outer {
   width: 80px;
@@ -668,16 +676,16 @@ svg
     margin-left: 0;
   }
   .layout-wrapper.active .sidebar-wrapper {
-    left: -308px;
+    left: 0;
   }
   .layout-wrapper .sidebar-wrapper {
-    left: 0;
+    left: -308px;
   }
   .layout-wrapper .sidebar-wrapper + .aside-overlay {
-    left: 0;
+    left: -100%;
   }
   .layout-wrapper.active .sidebar-wrapper + .aside-overlay {
-    left: -100%;
+    left: 0;
   }
 }
 

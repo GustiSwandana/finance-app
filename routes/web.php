@@ -1,12 +1,19 @@
 <?php
 
+use App\Http\Controllers\AdminApprovalController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TransactionController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WalletController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,86 +26,76 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// --- GROUP 1: PROFILE (Bawaan Laravel Breeze) ---
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// --- GROUP 2: APLIKASI UTAMA (Dashboard & Transaksi) ---
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    // 1. Dashboard
+Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Route Riwayat Transaksi (Index)
+    Route::view('/calculator', 'calculator.index')->name('calculator.index');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 
-    // 2. Fitur Pemasukan (Income)
     Route::get('/income/create', [TransactionController::class, 'createIncome'])->name('income.create');
     Route::post('/income', [TransactionController::class, 'storeIncome'])->name('income.store');
 
-    // 3. Fitur Pengeluaran (Expense)
     Route::get('/expense/create', [TransactionController::class, 'createExpense'])->name('expense.create');
     Route::post('/expense', [TransactionController::class, 'storeExpense'])->name('expense.store');
 
-    // 4. Fitur Transfer (TAMBAHKAN BAGIAN INI) <---
     Route::get('/transfer/create', [TransactionController::class, 'createTransfer'])->name('transfer.create');
     Route::post('/transfer', [TransactionController::class, 'storeTransfer'])->name('transfer.store');
 
-    // 5. Manajemen Bank & Kategori (Dinamis)
-    Route::resource('wallets', \App\Http\Controllers\WalletController::class)->only(['index', 'store', 'destroy']);
-    Route::resource('categories', \App\Http\Controllers\CategoryController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('wallets', WalletController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'destroy']);
 
-    // Route Edit & Update
     Route::get('/transaction/{id}/edit', [TransactionController::class, 'edit'])->name('transactions.edit');
     Route::put('/transaction/{id}', [TransactionController::class, 'update'])->name('transactions.update');
-
-    // Route Delete
     Route::delete('/transaction/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    Route::delete('/transactions/reset/all', [TransactionController::class, 'resetAll'])->name('transactions.reset-all');
 
-    // Laporan Keuangan
-    Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/detail', [ReportController::class, 'detail'])->name('reports.detail');
+    Route::get('/reports/detail/export/excel', [ReportController::class, 'exportDetailExcel'])->name('reports.detail.excel');
+    Route::get('/reports/detail/export/pdf', [ReportController::class, 'exportDetailPdf'])->name('reports.detail.pdf');
 
-    // Fitur Langganan / Tagihan
-    Route::get('/subscriptions', [App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscriptions.index');
-    Route::post('/subscriptions', [App\Http\Controllers\SubscriptionController::class, 'store'])->name('subscriptions.store');
-    Route::post('/subscriptions/{id}/pay', [App\Http\Controllers\SubscriptionController::class, 'pay'])->name('subscriptions.pay');
-    Route::delete('/subscriptions/{id}', [App\Http\Controllers\SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
+    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+    Route::post('/subscriptions/{id}/pay', [SubscriptionController::class, 'pay'])->name('subscriptions.pay');
+    Route::delete('/subscriptions/{id}', [SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
 
-    // Route Export
     Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
     Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
 
-    // Route Edit & Update
-    Route::get('/transaction/{id}/edit', [TransactionController::class, 'edit'])->name('transactions.edit');
-    Route::put('/transaction/{id}', [TransactionController::class, 'update'])->name('transactions.update');
-    
-    // Route Delete
-    Route::delete('/transaction/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    Route::post('/wallets/ajax', [WalletController::class, 'storeAjax'])->name('wallets.storeAjax');
+    Route::post('/categories/ajax', [CategoryController::class, 'storeAjax'])->name('categories.storeAjax');
 
-    // Route Quick Add (AJAX)
-    Route::post('/wallets/ajax', [App\Http\Controllers\WalletController::class, 'storeAjax'])->name('wallets.storeAjax');
-    Route::post('/categories/ajax', [App\Http\Controllers\CategoryController::class, 'storeAjax'])->name('categories.storeAjax');
+    Route::get('/debts', [DebtController::class, 'index'])->name('debts.index');
+    Route::post('/debts', [DebtController::class, 'store'])->name('debts.store');
+    Route::post('/debts/{id}/pay', [DebtController::class, 'markAsPaid'])->name('debts.pay');
 
-    // Manajemen User
-    Route::resource('users', \App\Http\Controllers\UserController::class);
+    Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
+    Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
 
-    // Utang Piutang
-    Route::get('/debts', [App\Http\Controllers\DebtController::class, 'index'])->name('debts.index');
-    Route::post('/debts', [App\Http\Controllers\DebtController::class, 'store'])->name('debts.store');
-    Route::post('/debts/{id}/pay', [App\Http\Controllers\DebtController::class, 'markAsPaid'])->name('debts.pay');
+    Route::get('/bank-mutations', [ImportController::class, 'create'])->name('bank-mutations.create');
+    Route::post('/bank-mutations/preview', [ImportController::class, 'preview'])->name('bank-mutations.preview');
+    Route::post('/bank-mutations', [ImportController::class, 'store'])->name('bank-mutations.store');
 
-    // Fitur Budgeting
-    Route::get('/budgets', [App\Http\Controllers\BudgetController::class, 'index'])->name('budgets.index');
-    Route::post('/budgets', [App\Http\Controllers\BudgetController::class, 'store'])->name('budgets.store');
+    Route::redirect('/imports/create', '/bank-mutations')->name('import.create');
+    Route::post('/imports/preview', [ImportController::class, 'preview'])->name('import.preview');
+    Route::post('/imports', [ImportController::class, 'store'])->name('import.store');
 
-    // Route untuk Scan Struk (OCR)
     Route::post('/transactions/scan', [TransactionController::class, 'storeFromReceipt'])->name('transactions.scan');
 });
 
-// --- ROUTE KHUSUS: SETUP DATA AWAL (Hanya dijalankan sekali) ---
+Route::middleware(['auth', 'active', 'admin'])->group(function () {
+    Route::get('/admin/approvals', [AdminApprovalController::class, 'index'])->name('admin.approvals.index');
+    Route::post('/admin/approvals/{id}/approve', [AdminApprovalController::class, 'approve'])->name('admin.approve');
+    Route::delete('/admin/approvals/{id}/reject', [AdminApprovalController::class, 'reject'])->name('admin.reject');
+
+    Route::resource('users', UserController::class)->except(['show']);
+});
+
 Route::get('/setup-data', function () {
     $user = Auth::user();
 
@@ -137,8 +134,6 @@ Route::get('/setup-data', function () {
     }
 
     return redirect()->route('dashboard')->with('success', 'Data Bank & Kategori berhasil dibuat! Silakan mulai transaksi.');
-})->middleware('auth');
-
-
+})->middleware(['auth', 'active']);
 
 require __DIR__ . '/auth.php';

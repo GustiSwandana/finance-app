@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use App\Models\Wallet;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -11,17 +11,62 @@ class DashboardController extends Controller
     public function index()
     {
         $userId = Auth::id();
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
 
-        // 1. Ambil Data Wallet User
-        // Kita gunakan first() karena kita tahu user hanya punya 1 akun per bank (sesuai logika bisnis Anda)
-        $bca = Wallet::where('user_id', $userId)->where('bank_name', 'BCA')->first();
-        $mandiri = Wallet::where('user_id', $userId)->where('bank_name', 'Mandiri')->first();
-        $bri = Wallet::where('user_id', $userId)->where('bank_name', 'BRI')->first();
+        $wallets = Wallet::where('user_id', $userId)->orderBy('bank_name')->get();
+        $bca = $wallets->firstWhere('bank_name', 'BCA');
+        $mandiri = $wallets->firstWhere('bank_name', 'Mandiri');
+        $bri = $wallets->firstWhere('bank_name', 'BRI');
+        $otherWallets = $wallets->reject(fn (Wallet $wallet) => in_array($wallet->bank_name, ['BCA', 'Mandiri', 'BRI'], true))->values();
+        $totalSaldo = $wallets->sum('balance');
 
-        // 2. Hitung Total Saldo (Opsional, untuk info tambahan)
-        $totalSaldo = ($bca->balance ?? 0) + ($mandiri->balance ?? 0) + ($bri->balance ?? 0);
+        $monthlyIncome = Transaction::where('user_id', $userId)
+            ->where('type', 'income')
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->sum('amount');
 
-        // 3. Kirim data ke View dashboard
-        return view('dashboard', compact('bca', 'mandiri', 'bri', 'totalSaldo'));
+        $monthlyExpense = Transaction::where('user_id', $userId)
+            ->where('type', 'expense')
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->sum('amount');
+
+        $monthlyNet = $monthlyIncome - $monthlyExpense;
+        $monthlyTransactionCount = Transaction::where('user_id', $userId)
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->count();
+
+        $todayTransactionCount = Transaction::where('user_id', $userId)
+            ->whereDate('date', now()->toDateString())
+            ->count();
+
+        $expenseRatio = $monthlyIncome > 0
+            ? min(100, round(($monthlyExpense / $monthlyIncome) * 100))
+            : ($monthlyExpense > 0 ? 100 : 0);
+
+        $walletCards = $wallets->sortByDesc('balance')->values();
+
+        $latestTransactions = Transaction::where('user_id', $userId)
+            ->with(['category', 'wallet'])
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('dashboard', compact(
+            'bca',
+            'mandiri',
+            'bri',
+            'otherWallets',
+            'totalSaldo',
+            'latestTransactions',
+            'monthlyIncome',
+            'monthlyExpense',
+            'monthlyNet',
+            'monthlyTransactionCount',
+            'todayTransactionCount',
+            'expenseRatio',
+            'walletCards'
+        ));
     }
 }

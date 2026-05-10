@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Transaction;
+use App\Models\Wallet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -18,6 +21,8 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+            'transactionCount' => Transaction::where('user_id', $request->user()->id)->count(),
+            'walletCount' => Wallet::where('user_id', $request->user()->id)->count(),
         ]);
     }
 
@@ -44,6 +49,8 @@ class ProfileController extends Controller
     {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
+            'confirmation_text' => ['required', Rule::in(['HAPUS AKUN'])],
+            'confirm_permanent_delete' => ['accepted'],
         ]);
 
         $user = $request->user();

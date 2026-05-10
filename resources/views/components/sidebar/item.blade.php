@@ -5,9 +5,9 @@
     $isActive = request()->routeIs($route) || request()->routeIs($route . '.*');
     
     // Kelas CSS untuk status Aktif vs Tidak Aktif
-    $classes = $isActive 
-        ? 'text-success-300 font-bold' 
-        : 'text-bgray-900 dark:text-white hover:bg-bgray-50 dark:hover:bg-darkblack-500 transition-colors';
+    $classes = $isActive
+        ? 'text-emerald-600 dark:text-emerald-300 font-bold'
+        : 'text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-900/70 transition-colors';
 @endphp
 
 <li class="item py-[11px] rounded-lg {{ $classes }}">

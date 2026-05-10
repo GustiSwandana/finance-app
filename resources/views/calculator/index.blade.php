@@ -1,155 +1,163 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[85vh] flex flex-col justify-center">
-
-    {{-- Header Sederhana --}}
-    <div class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-end gap-4">
-        <div>
-            <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Kalkulator Pintar</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Hitung simulasi anggaran dengan cepat sebelum dicatat.</p>
-        </div>
-        <div class="text-right hidden md:block">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Item</span>
-            <div id="total-count-badge" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">0</div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-
-        {{-- KOLOM KIRI: KALKULATOR (Lebar 5/12) --}}
-        <div class="xl:col-span-5 w-full">
-            <div class="bg-white dark:bg-darkblack-600 rounded-[2rem] shadow-2xl shadow-indigo-100 dark:shadow-none border border-gray-100 dark:border-darkblack-500 overflow-hidden relative">
-
-                {{-- Bagian Layar & Input --}}
-                <div class="bg-slate-900 p-6 pt-8 pb-10 relative overflow-hidden">
-                    {{-- Dekorasi Background --}}
-                    <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
-                    <div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-emerald-500 rounded-full blur-3xl opacity-20"></div>
-
-                    {{-- Input Label Keterangan --}}
-                    <div class="relative z-10 mb-6">
-                        <label class="text-xs font-bold text-slate-400 uppercase mb-1 block">Keterangan Transaksi</label>
-                        <input type="text" id="calc-label" placeholder="Ketiga: Gaji, Jualan, Listrik..." class="w-full bg-slate-800/50 border border-slate-700 text-white placeholder-slate-500 text-sm px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                    </div>
-
-                    {{-- Layar Angka --}}
-                    <div class="relative z-10 text-right">
-                        <div id="calc-history" class="text-slate-400 text-sm h-5 mb-1 font-mono opacity-0 transition-opacity">0</div>
-                        <div id="calc-display" class="text-white text-5xl font-mono font-bold tracking-tight break-all">0</div>
-                    </div>
-                </div>
-
-                {{-- Bagian Keypad --}}
-                <div class="p-5 bg-white dark:bg-darkblack-600">
-
-                    {{-- Tombol Aksi Cepat (Masuk/Keluar) --}}
-                    <div class="grid grid-cols-2 gap-3 mb-5">
-                        <button onclick="addItem('in')" class="group relative py-3.5 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm border border-emerald-100 dark:border-emerald-800">
-                            <div class="bg-emerald-200 dark:bg-emerald-800 rounded-full p-1 text-emerald-700 dark:text-emerald-300">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
-                            </div>
-                            <span class="text-sm">PEMASUKAN</span>
-                        </button>
-                        <button onclick="addItem('out')" class="group relative py-3.5 px-4 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/30 text-rose-700 dark:text-rose-400 font-bold rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm border border-rose-100 dark:border-rose-800">
-                            <div class="bg-rose-200 dark:bg-rose-800 rounded-full p-1 text-rose-700 dark:text-rose-300">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" /></svg>
-                            </div>
-                            <span class="text-sm">PENGELUARAN</span>
-                        </button>
-                    </div>
-
-                    {{-- Grid Angka --}}
-                    <div class="grid grid-cols-4 gap-3">
-                        <button onclick="clearDisplay()" class="btn-calc text-rose-500 bg-rose-50 hover:bg-rose-100">AC</button>
-                        <button onclick="deleteDigit()" class="btn-calc text-slate-600 bg-slate-100 hover:bg-slate-200">⌫</button>
-                        <button onclick="appendOperator('%')" class="btn-calc text-indigo-600 bg-indigo-50 hover:bg-indigo-100">%</button>
-                        <button onclick="appendOperator('/')" class="btn-calc text-white bg-indigo-500 hover:bg-indigo-600 text-xl">÷</button>
-
-                        <button onclick="appendNumber('7')" class="btn-calc-num">7</button>
-                        <button onclick="appendNumber('8')" class="btn-calc-num">8</button>
-                        <button onclick="appendNumber('9')" class="btn-calc-num">9</button>
-                        <button onclick="appendOperator('*')" class="btn-calc text-white bg-indigo-500 hover:bg-indigo-600 text-xl">×</button>
-
-                        <button onclick="appendNumber('4')" class="btn-calc-num">4</button>
-                        <button onclick="appendNumber('5')" class="btn-calc-num">5</button>
-                        <button onclick="appendNumber('6')" class="btn-calc-num">6</button>
-                        <button onclick="appendOperator('-')" class="btn-calc text-white bg-indigo-500 hover:bg-indigo-600 text-xl">−</button>
-
-                        <button onclick="appendNumber('1')" class="btn-calc-num">1</button>
-                        <button onclick="appendNumber('2')" class="btn-calc-num">2</button>
-                        <button onclick="appendNumber('3')" class="btn-calc-num">3</button>
-                        <button onclick="appendOperator('+')" class="btn-calc text-white bg-indigo-500 hover:bg-indigo-600 text-xl">+</button>
-
-                        <button onclick="appendNumber('0')" class="btn-calc-num">0</button>
-                        <button onclick="appendNumber('000')" class="btn-calc-num text-sm font-bold text-indigo-600 dark:text-indigo-400">000</button>
-                        <button onclick="appendNumber('.')" class="btn-calc-num">.</button>
-                        <button onclick="calculate()" class="btn-calc bg-slate-800 text-white hover:bg-slate-900 text-xl">=</button>
-                    </div>
-                </div>
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <section class="app-hero px-6 py-8 sm:px-8 sm:py-10">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <p class="app-eyebrow">Smart Calculator</p>
+                <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Simulasikan pemasukan dan pengeluaran sebelum benar-benar dicatat.</h1>
+                <p class="mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">Halaman ini membantu menghitung skenario cepat. Hasil akhirnya bisa disalin lalu dipakai sebagai referensi saat input transaksi.</p>
+            </div>
+            <div class="metric-card min-w-[180px] px-6 py-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Total item</p>
+                <p id="total-count-badge" class="mt-3 text-3xl font-black text-slate-950">0</p>
+                <p class="mt-2 text-xs text-slate-500">Rincian aktif</p>
             </div>
         </div>
+    </section>
 
-        {{-- KOLOM KANAN: STRUK / RINCIAN (Lebar 7/12) --}}
-        <div class="xl:col-span-7 w-full h-full">
-            <div class="bg-gray-50 dark:bg-darkblack-600 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-darkblack-400 p-6 md:p-8 h-full flex flex-col min-h-[500px]">
+    <div class="grid gap-8 xl:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
+        <section class="app-panel overflow-hidden">
+            <div class="bg-slate-950 px-6 py-7 text-white">
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Input cepat</p>
+                <div class="mt-4">
+                    <label for="calc-label" class="mb-2 block text-sm font-bold text-slate-200">Keterangan transaksi</label>
+                    <input type="text" id="calc-label" placeholder="Contoh: gaji, jualan, listrik, makan siang" class="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-white placeholder:text-slate-500 focus:border-indigo-400 focus:ring-0">
+                </div>
+                <div class="mt-6 text-right">
+                    <div id="calc-history" class="min-h-[20px] text-sm font-medium text-slate-400 opacity-0"></div>
+                    <div id="calc-display" class="mt-2 break-all text-5xl font-black tracking-tight text-white">0</div>
+                </div>
+            </div>
 
-                {{-- Judul Struk --}}
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-darkblack-500">
-                    <h3 class="font-bold text-lg text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                        Rincian Perhitungan
-                    </h3>
-                    <button onclick="resetAll()" class="text-xs font-bold text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">
-                        RESET SEMUA
+            <div class="p-6">
+                <div class="mb-5 grid grid-cols-2 gap-3">
+                    <button onclick="addItem('in')" class="flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3.5 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-200 text-emerald-800">+</span>
+                        Pemasukan
+                    </button>
+                    <button onclick="addItem('out')" class="flex items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3.5 text-sm font-bold text-rose-600 transition hover:bg-rose-100">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-rose-200 text-rose-700">-</span>
+                        Pengeluaran
                     </button>
                 </div>
 
-                {{-- List Container --}}
-                <div id="list-container" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                    {{-- Empty State --}}
-                    <div id="empty-state" class="flex flex-col items-center justify-center h-full py-10 opacity-50">
-                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" class="w-20 h-20 mb-3 grayscale opacity-30" alt="Empty">
-                        <p class="text-gray-400 text-sm text-center">Belum ada transaksi.<br>Gunakan tombol di kiri untuk mulai.</p>
-                    </div>
+                <div class="grid grid-cols-4 gap-3">
+                    <button onclick="clearDisplay()" class="calc-action text-rose-600">AC</button>
+                    <button onclick="deleteDigit()" class="calc-action text-slate-700">Del</button>
+                    <button onclick="appendOperator('%')" class="calc-action text-indigo-700">%</button>
+                    <button onclick="appendOperator('/')" class="calc-op">/</button>
+
+                    <button onclick="appendNumber('7')" class="calc-num">7</button>
+                    <button onclick="appendNumber('8')" class="calc-num">8</button>
+                    <button onclick="appendNumber('9')" class="calc-num">9</button>
+                    <button onclick="appendOperator('*')" class="calc-op">*</button>
+
+                    <button onclick="appendNumber('4')" class="calc-num">4</button>
+                    <button onclick="appendNumber('5')" class="calc-num">5</button>
+                    <button onclick="appendNumber('6')" class="calc-num">6</button>
+                    <button onclick="appendOperator('-')" class="calc-op">-</button>
+
+                    <button onclick="appendNumber('1')" class="calc-num">1</button>
+                    <button onclick="appendNumber('2')" class="calc-num">2</button>
+                    <button onclick="appendNumber('3')" class="calc-num">3</button>
+                    <button onclick="appendOperator('+')" class="calc-op">+</button>
+
+                    <button onclick="appendNumber('0')" class="calc-num">0</button>
+                    <button onclick="appendNumber('000')" class="calc-num text-sm">000</button>
+                    <button onclick="appendNumber('.')" class="calc-num">.</button>
+                    <button onclick="calculate()" class="calc-op bg-slate-950">=</button>
                 </div>
-
-                {{-- Footer Total --}}
-                <div class="mt-6 pt-6 border-t-2 border-gray-200 dark:border-darkblack-400">
-                    <div class="flex justify-between items-center bg-white dark:bg-darkblack-500 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-darkblack-400">
-                        <span class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Sisa Bersih</span>
-                        <span id="grand-total" class="font-mono font-bold text-3xl md:text-4xl text-gray-900 dark:text-white">Rp 0</span>
-                    </div>
-
-                    {{-- Tombol Copy --}}
-                    <button onclick="copyResult()" class="w-full mt-3 py-3 text-sm font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                        Salin Hasil Akhir
-                    </button>
-                </div>
-
             </div>
-        </div>
+        </section>
 
+        <section class="app-panel flex min-h-[560px] flex-col p-6 sm:p-8">
+            <div class="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="app-eyebrow bg-slate-100 text-slate-600">Receipt View</p>
+                    <h2 class="mt-3 text-2xl font-black tracking-tight text-slate-950">Rincian perhitungan</h2>
+                </div>
+                <button onclick="resetAll()" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-600 transition hover:bg-rose-100">
+                    Reset semua
+                </button>
+            </div>
+
+            <div id="list-container" class="custom-scrollbar mt-6 flex-1 space-y-3 overflow-y-auto pr-1">
+                <div id="empty-state" class="flex h-full min-h-[280px] flex-col items-center justify-center text-center">
+                    <div class="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <svg class="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                    </div>
+                    <p class="mt-4 text-lg font-bold text-slate-800">Belum ada item</p>
+                    <p class="mt-2 max-w-sm text-sm text-slate-500">Masukkan nominal di kalkulator kiri, lalu kirim sebagai pemasukan atau pengeluaran untuk membentuk simulasi.</p>
+                </div>
+            </div>
+
+            <div class="mt-6 border-t border-slate-200 pt-6">
+                <div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-5">
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Saldo bersih</p>
+                    <p id="grand-total" class="mt-3 font-mono text-4xl font-black tracking-tight text-slate-950">Rp 0</p>
+                </div>
+                <button onclick="copyResult()" class="mt-4 w-full rounded-2xl bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100">
+                    Salin Hasil Akhir
+                </button>
+            </div>
+        </section>
     </div>
 </div>
 
-{{-- CSS KHUSUS --}}
 <style>
-    /* Button Styles */
-    .btn-calc {
-        @apply h-14 rounded-2xl font-bold text-lg transition-all active: scale-95 flex items-center justify-center shadow-sm border border-transparent dark:border-darkblack-500;
+    .calc-num,
+    .calc-action,
+    .calc-op {
+        min-height: 56px;
+        border-radius: 18px;
+        font-weight: 800;
+        transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .btn-calc-num {
-        @apply h-14 rounded-2xl font-bold text-xl bg-white text-gray-700 hover: bg-gray-50 shadow-sm border border-gray-200 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-gray-200 dark:hover:bg-darkblack-400 transition-all active:scale-95;
+    .calc-num {
+        border: 1px solid rgba(226, 232, 240, 1);
+        background: rgba(255, 255, 255, 0.92);
+        color: rgb(51 65 85);
+        font-size: 1.125rem;
     }
 
-    /* Scrollbar Halus */
+    .calc-num:hover {
+        background: rgb(248 250 252);
+        box-shadow: 0 10px 20px rgba(148, 163, 184, 0.12);
+    }
+
+    .calc-action {
+        border: 1px solid rgba(226, 232, 240, 1);
+        background: rgb(248 250 252);
+        font-size: 1rem;
+    }
+
+    .calc-action:hover {
+        background: rgb(241 245 249);
+    }
+
+    .calc-op {
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        background: rgb(79 70 229);
+        color: white;
+        font-size: 1.25rem;
+        box-shadow: 0 14px 28px rgba(79, 70, 229, 0.18);
+    }
+
+    .calc-op:hover {
+        background: rgb(67 56 202);
+    }
+
+    .calc-num:active,
+    .calc-action:active,
+    .calc-op:active {
+        transform: scale(0.97);
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -160,18 +168,37 @@
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
         background-color: #cbd5e1;
-        border-radius: 20px;
+        border-radius: 999px;
+    }
+
+    .dark .calc-num {
+        border-color: rgba(51, 65, 85, 0.9);
+        background: rgba(15, 23, 42, 0.82);
+        color: rgb(226 232 240);
+    }
+
+    .dark .calc-num:hover {
+        background: rgba(30, 41, 59, 0.92);
+    }
+
+    .dark .calc-action {
+        border-color: rgba(51, 65, 85, 0.9);
+        background: rgba(15, 23, 42, 0.78);
+        color: rgb(203 213 225);
+    }
+
+    .dark .calc-action:hover {
+        background: rgba(30, 41, 59, 0.92);
     }
 
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #334155;
+        background-color: #475569;
     }
 
-    /* Animasi Masuk */
     @keyframes slideIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
         }
 
         to {
@@ -181,12 +208,10 @@
     }
 
     .animate-slide-in {
-        animation: slideIn 0.3s ease-out forwards;
+        animation: slideIn 0.25s ease-out forwards;
     }
-
 </style>
 
-{{-- JAVASCRIPT LOGIC --}}
 <script>
     let currentInput = '0';
     let items = [];
@@ -194,7 +219,6 @@
     let previousInput = '';
     let shouldResetScreen = false;
 
-    // Elements
     const display = document.getElementById('calc-display');
     const historyEl = document.getElementById('calc-history');
     const labelInput = document.getElementById('calc-label');
@@ -203,10 +227,9 @@
     const grandTotalEl = document.getElementById('grand-total');
     const totalCountBadge = document.getElementById('total-count-badge');
 
-    // --- LOGIKA KALKULATOR ---
-
     function updateDisplay() {
         display.innerText = formatNumber(currentInput);
+
         if (operator !== null) {
             historyEl.innerText = `${formatNumber(previousInput)} ${operator}`;
             historyEl.classList.remove('opacity-0');
@@ -219,8 +242,9 @@
     function formatNumber(num) {
         if (num === '' || num === '.') return num;
         if (isNaN(num)) return 'Error';
-        let parts = num.toString().split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        const parts = num.toString().split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         return parts.join(',');
     }
 
@@ -229,11 +253,11 @@
             currentInput = '';
             shouldResetScreen = false;
         }
+
         if (number === '.' && currentInput.includes('.')) return;
 
-        // Handle tombol 000
         if (number === '000') {
-            if (currentInput === '') return; // Jangan mulai dengan 000
+            if (currentInput === '') return;
             currentInput += '000';
         } else {
             currentInput += number;
@@ -266,11 +290,12 @@
 
     function calculate() {
         if (operator === null || shouldResetScreen) return;
-        let result;
+
         const prev = parseFloat(previousInput);
         const current = parseFloat(currentInput);
         if (isNaN(prev) || isNaN(current)) return;
 
+        let result;
         switch (operator) {
             case '+':
                 result = prev + current;
@@ -288,41 +313,37 @@
                 result = prev % current;
                 break;
         }
+
         currentInput = result.toString();
         operator = null;
         previousInput = '';
-        updateDisplay();
         shouldResetScreen = true;
+        updateDisplay();
     }
-
-    // --- LOGIKA LIST / STRUK ---
 
     function addItem(type) {
         if (operator !== null) calculate();
 
         const amount = parseFloat(currentInput);
         if (amount <= 0 || isNaN(amount)) {
-            alert("Masukkan angka nominal terlebih dahulu.");
+            alert('Masukkan angka nominal terlebih dahulu.');
             return;
         }
 
-        // Tentukan Label
         let label = labelInput.value.trim();
         if (!label) {
-            label = type === 'in' ? 'Pemasukan Lain' : 'Pengeluaran Lain';
+            label = type === 'in' ? 'Pemasukan lain' : 'Pengeluaran lain';
         }
 
         items.push({
-            id: Date.now()
-            , desc: label
-            , amount: amount
-            , type: type
+            id: Date.now(),
+            desc: label,
+            amount: amount,
+            type: type
         });
 
-        // Reset
         currentInput = '0';
         labelInput.value = '';
-        labelInput.placeholder = "Item selanjutnya...";
         updateDisplay();
         renderList();
     }
@@ -336,7 +357,6 @@
         if (items.length > 0 && !confirm('Hapus semua rincian transaksi?')) return;
         items = [];
         labelInput.value = '';
-        labelInput.placeholder = "Ketiga: Gaji, Jualan, Listrik...";
         clearDisplay();
         renderList();
     }
@@ -348,84 +368,65 @@
         if (items.length === 0) {
             listContainer.appendChild(emptyState);
             grandTotalEl.innerText = 'Rp 0';
-            grandTotalEl.className = "font-mono font-bold text-3xl md:text-4xl text-gray-900 dark:text-white";
+            grandTotalEl.className = 'mt-3 font-mono text-4xl font-black tracking-tight text-slate-950';
             totalCountBadge.innerText = '0';
             return;
         }
 
         items.forEach(item => {
-            if (item.type === 'in') total += item.amount;
-            else total -= item.amount;
+            total += item.type === 'in' ? item.amount : -item.amount;
 
             const el = document.createElement('div');
             const isPlus = item.type === 'in';
-            const colorClass = isPlus ? 'text-emerald-600' : 'text-rose-600';
-            const bgIcon = isPlus ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-rose-100 dark:bg-rose-900/30';
-            const iconPath = isPlus ?
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>' :
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>';
+            const colorClass = isPlus ? 'text-emerald-700' : 'text-rose-600';
+            const bgIcon = isPlus ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600';
+            const icon = isPlus ? '+' : '-';
 
-            el.className = "flex justify-between items-center bg-white dark:bg-darkblack-500 p-4 rounded-xl border border-gray-100 dark:border-darkblack-400 shadow-sm animate-slide-in group hover:border-indigo-200 transition-colors";
-
+            el.className = 'animate-slide-in flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-indigo-200 hover:bg-white';
             el.innerHTML = `
                 <div class="flex items-center gap-4">
-                    <div class="${bgIcon} w-10 h-10 rounded-full flex items-center justify-center ${colorClass}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconPath}</svg>
-                    </div>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full ${bgIcon} font-black">${icon}</div>
                     <div>
-                        <p class="font-bold text-gray-800 dark:text-white text-sm md:text-base line-clamp-1">${item.desc}</p>
-                        <p class="text-xs text-gray-400 font-mono">ID: ${item.id.toString().slice(-4)}</p>
+                        <p class="text-sm font-bold text-slate-900">${item.desc}</p>
+                        <p class="mt-1 text-xs text-slate-400">ID ${item.id.toString().slice(-4)}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="block font-mono font-bold ${colorClass} text-lg">
-                        ${isPlus ? '+' : '-'} ${formatNumber(item.amount)}
-                    </span>
-                    <button onclick="removeItem(${item.id})" class="text-xs text-gray-300 hover:text-rose-500 underline decoration-dashed opacity-0 group-hover:opacity-100 transition-opacity">Hapus</button>
+                    <p class="text-lg font-black ${colorClass}">${isPlus ? '+' : '-'} ${formatNumber(item.amount)}</p>
+                    <button onclick="removeItem(${item.id})" class="mt-1 text-xs font-bold text-slate-400 transition hover:text-rose-500">Hapus</button>
                 </div>
             `;
             listContainer.appendChild(el);
         });
 
-        // Update Total
         totalCountBadge.innerText = items.length;
         grandTotalEl.innerText = 'Rp ' + formatNumber(total);
-        if (total < 0) grandTotalEl.className = "font-mono font-bold text-3xl md:text-4xl text-rose-600";
-        else grandTotalEl.className = "font-mono font-bold text-3xl md:text-4xl text-emerald-600";
-
-        // Auto scroll
+        grandTotalEl.className = `mt-3 font-mono text-4xl font-black tracking-tight ${total < 0 ? 'text-rose-600' : 'text-emerald-700'}`;
         listContainer.scrollTop = listContainer.scrollHeight;
     }
 
     function copyResult() {
-        let text = grandTotalEl.innerText.replace(/[^\d,-]/g, '').replace(',', '.'); // Bersihkan Rp dan titik
+        const text = grandTotalEl.innerText.replace(/[^\d,-]/g, '').replace(',', '.');
         navigator.clipboard.writeText(text).then(() => {
-            alert('Hasil ' + grandTotalEl.innerText + ' berhasil disalin!');
+            alert('Hasil ' + grandTotalEl.innerText + ' berhasil disalin.');
         });
     }
 
-    // --- PERBAIKAN UTAMA: KEYBOARD LISTENER YANG AMAN ---
     window.addEventListener('keydown', (e) => {
-        // PERBAIKAN: Jika user sedang mengetik di Input Label, JANGAN jalankan kalkulator
         if (document.activeElement === labelInput) {
             if (e.key === 'Enter') {
-                // Opsional: Jika enter di input text, pindah fokus ke kalkulator atau submit
-                labelInput.blur(); // Lepas fokus agar bisa hitung
+                labelInput.blur();
             }
-            return; // Stop fungsi di bawah ini
+            return;
         }
 
-        // Shortcut Kalkulator
         if (e.key >= 0 && e.key <= 9) appendNumber(e.key);
         if (e.key === '.') appendNumber('.');
         if (e.key === '=' || e.key === 'Enter') calculate();
         if (e.key === 'Backspace') deleteDigit();
         if (e.key === 'Escape') clearDisplay();
         if (['+', '-', '*', '/', '%'].includes(e.key)) appendOperator(e.key);
-
-        // Shortcut k = 000 (Fitur Tambahan)
         if (e.key.toLowerCase() === 'k') appendNumber('000');
     });
-
 </script>
 @endsection

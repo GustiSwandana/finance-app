@@ -12,7 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Kita ubah kolom status menjadi VARCHAR(50) agar bisa menampung teks apa saja
+        if (! in_array(Schema::getConnection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            return;
+        }
+
         DB::statement("ALTER TABLE transactions MODIFY COLUMN status VARCHAR(50) DEFAULT 'completed'");
     }
 

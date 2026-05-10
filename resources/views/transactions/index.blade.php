@@ -1,324 +1,364 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto">
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <section class="app-hero px-6 py-7 md:px-8 md:py-8">
+        <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <p class="app-eyebrow">Cashflow Desk</p>
+                <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Catat pemasukan dan pengeluaran tanpa ribet.</h1>
+                <p class="mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
+                    Halaman ini jadi pusat operasional harian: input transaksi manual, tambah bank atau kategori dengan cepat, lalu cek histori terbaru di tempat yang sama.
+                </p>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-3">
+                <div class="min-w-[170px] rounded-[24px] border border-white/15 bg-slate-950/35 px-4 py-4 backdrop-blur-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Wallet</p>
+                    <p class="mt-3 text-3xl font-black text-white">{{ $wallets->count() }}</p>
+                    <p class="mt-2 text-xs text-white/65">Sumber dana aktif</p>
+                </div>
+                <div class="min-w-[170px] rounded-[24px] border border-white/15 bg-slate-950/35 px-4 py-4 backdrop-blur-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Pemasukan</p>
+                    <p class="mt-3 text-3xl font-black text-emerald-300">{{ $incomeCategories->count() }}</p>
+                    <p class="mt-2 text-xs text-white/65">Kategori masuk</p>
+                </div>
+                <div class="min-w-[170px] rounded-[24px] border border-white/15 bg-slate-950/35 px-4 py-4 backdrop-blur-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Pengeluaran</p>
+                    <p class="mt-3 text-3xl font-black text-rose-300">{{ $expenseCategories->count() }}</p>
+                    <p class="mt-2 text-xs text-white/65">Kategori keluar</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="mb-8">
-        <h2 class="text-3xl font-black text-bgray-900 dark:text-white tracking-tight">Transaksi Baru</h2>
-        <p class="text-sm font-medium text-bgray-500 dark:text-bgray-400">Catat arus kas manual atau gunakan AI Scan.</p>
-    </div>
-
-    <div class="flex flex-col xl:flex-row gap-8 items-start">
-
-        <div class="w-full xl:w-1/3 xl:sticky xl:top-24 z-10">
-
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-xl shadow-indigo-200 dark:shadow-none mb-6">
-                <div class="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
-
-                <div class="relative z-10">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md border border-white/20 shadow-inner ring-1 ring-white/10">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
-                                <path d="M4 7V4h3" />
-                                <path d="M20 7V4h-3" />
-                                <path d="M4 17v3h3" />
-                                <path d="M20 17v3h-3" />
-                                <path d="M9 12h6" /> </svg>
-                            <div class="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-400 animate-pulse"></div>
-                        </div>
-
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="font-black text-xl tracking-tight text-white">AI Scan Struk</h4>
-                                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">PRO</span>
-                            </div>
-                            <p class="text-xs font-medium text-indigo-100/90 mt-1">Upload struk, otomatis jadi data.</p>
-                        </div>
+    <div class="grid gap-8 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)] xl:items-start">
+        <div class="space-y-6 xl:sticky xl:top-24">
+            <section class="overflow-hidden rounded-[32px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.24),_transparent_42%),linear-gradient(135deg,#0f766e,#155e75_55%,#1d4ed8)] p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 7V4h3" />
+                            <path d="M20 7V4h-3" />
+                            <path d="M4 17v3h3" />
+                            <path d="M20 17v3h-3" />
+                            <path d="M9 12h6" />
+                        </svg>
                     </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-xl font-black tracking-tight">AI Scan Struk</h2>
+                            <span class="rounded-full border border-white/25 bg-white/15 px-2 py-1 text-[10px] font-extrabold uppercase tracking-[0.24em]">Fast lane</span>
+                        </div>
+                        <p class="mt-2 text-sm text-cyan-50/90">Upload foto struk, pilih wallet tujuan, lalu biarkan sistem bantu isi transaksi awal.</p>
+                    </div>
+                </div>
 
-                    <form action="{{ route('transactions.scan') }}" method="POST" enctype="multipart/form-data" class="flex gap-2 mt-4">
+                <form action="{{ route('transactions.scan') }}" method="POST" enctype="multipart/form-data" class="mt-6 space-y-3">
+                    @csrf
+                    <div>
+                        <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.26em] text-cyan-50/70">Wallet tujuan</label>
+                        <select name="wallet_id" class="w-full rounded-2xl border border-white/20 bg-white px-4 py-3 text-sm font-bold text-slate-900 focus:border-white focus:ring-0">
+                            @foreach($wallets as $wallet)
+                            <option value="{{ $wallet->id }}">{{ $wallet->bank_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <label class="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-900">
+                        <input type="file" name="receipt" class="hidden" onchange="this.form.submit()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Upload Foto Struk
+                    </label>
+                </form>
+            </section>
+
+            <section class="app-panel p-6">
+                <div class="rounded-2xl bg-slate-100 p-1.5">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="switchTab('income')" id="tab-income" type="button" class="rounded-2xl px-4 py-3 text-sm font-bold transition-all">
+                            Pemasukan
+                        </button>
+                        <button onclick="switchTab('expense')" id="tab-expense" type="button" class="rounded-2xl px-4 py-3 text-sm font-bold transition-all">
+                            Pengeluaran
+                        </button>
+                    </div>
+                </div>
+
+                @if($errors->any())
+                <div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                    <ul class="space-y-1">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                <style>
+                    input[type=number]::-webkit-inner-spin-button,
+                    input[type=number]::-webkit-outer-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                    }
+
+                    input[type=number] {
+                        -moz-appearance: textfield;
+                    }
+                </style>
+
+                <div id="form-income" class="mt-6 block">
+                    <form action="{{ route('income.store') }}" method="POST" class="space-y-5">
                         @csrf
-                        <div class="flex-1 relative">
-                            <select name="wallet_id" class="w-full appearance-none rounded-lg border-none bg-black/20 py-2.5 pl-3 pr-8 text-xs font-bold text-black focus:ring-2 focus:ring-black/50 cursor-pointer">
-                                @foreach($wallets as $wallet)
-                                <option value="{{ $wallet->id }}" class="text-black-900">{{ $wallet->bank_name }}</option>
-                                @endforeach
-                            </select>
+                        <div>
+                            <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Nominal masuk</label>
+                            <div class="flex items-center rounded-[28px] border border-emerald-100 bg-emerald-50/70 px-4 py-4 transition focus-within:border-emerald-300 focus-within:bg-white">
+                                <span class="pr-3 text-2xl font-black text-emerald-500">Rp</span>
+                                <input type="number" name="amount" class="w-full border-none bg-transparent p-0 text-3xl font-black tracking-tight text-slate-950 placeholder:text-slate-300 focus:ring-0" placeholder="0" required>
+                            </div>
                         </div>
 
-                        <label class="cursor-pointer flex items-center justify-center rounded-lg bg-white text-black-700 px-4 py-2.5 text-xs font-bold hover:bg-black-50 transition shadow-sm active:scale-95">
-                            <input type="file" name="receipt" class="hidden" onchange="this.form.submit()">
-                            <span class="text-black">Upload 📸</span>
-                        </label>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                    <label class="text-xs font-bold text-slate-500">Masuk ke wallet</label>
+                                    <button type="button" onclick="openQuickAdd('wallet')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700">+ Tambah wallet</button>
+                                </div>
+                                <select name="wallet_id" id="income_wallet_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:bg-white focus:ring-0">
+                                    @foreach($wallets as $wallet)
+                                    <option value="{{ $wallet->id }}">{{ $wallet->bank_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                    <label class="text-xs font-bold text-slate-500">Kategori</label>
+                                    <button type="button" onclick="openQuickAdd('income')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700">+ Tambah kategori</button>
+                                </div>
+                                <select name="category_id" id="income_category_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:bg-white focus:ring-0">
+                                    @foreach($incomeCategories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-[170px_minmax(0,1fr)]">
+                            <div>
+                                <label class="mb-2 block text-xs font-bold text-slate-500">Tanggal</label>
+                                <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:bg-white focus:ring-0">
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-xs font-bold text-slate-500">Catatan</label>
+                                <input type="text" name="description" placeholder="Contoh: bonus proyek, refund, titipan" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:border-emerald-300 focus:bg-white focus:ring-0">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full rounded-2xl bg-emerald-500 px-4 py-3.5 text-sm font-bold text-white shadow-[0_18px_35px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 hover:bg-emerald-600">
+                            Simpan Pemasukan
+                        </button>
                     </form>
                 </div>
-            </div>
 
-            <div class="rounded-2xl bg-white p-1 dark:bg-darkblack-600 shadow-lg border border-bgray-100 dark:border-darkblack-400">
+                <div id="form-expense" class="mt-6 hidden">
+                    <form action="{{ route('expense.store') }}" method="POST" class="space-y-5">
+                        @csrf
+                        <div>
+                            <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Nominal keluar</label>
+                            <div class="flex items-center rounded-[28px] border border-rose-100 bg-rose-50/70 px-4 py-4 transition focus-within:border-rose-300 focus-within:bg-white">
+                                <span class="pr-3 text-2xl font-black text-rose-500">Rp</span>
+                                <input type="number" name="amount" class="w-full border-none bg-transparent p-0 text-3xl font-black tracking-tight text-slate-950 placeholder:text-slate-300 focus:ring-0" placeholder="0" required>
+                            </div>
+                        </div>
 
-                <div class="flex p-1.5 bg-bgray-100 dark:bg-darkblack-500 rounded-xl mb-6">
-                    <button onclick="switchTab('income')" id="tab-income" class="w-1/2 py-2.5 rounded-lg text-sm font-bold text-gray-500 transition-all duration-300 hover:text-gray-700">
-                        Pemasukan
-                    </button>
-                    <button onclick="switchTab('expense')" id="tab-expense" class="w-1/2 py-2.5 rounded-lg text-sm font-bold text-gray-500 transition-all duration-300 hover:text-gray-700">
-                        Pengeluaran
-                    </button>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                    <label class="text-xs font-bold text-slate-500">Ambil dari wallet</label>
+                                    <button type="button" onclick="openQuickAdd('wallet')" class="text-xs font-bold text-rose-600 hover:text-rose-700">+ Tambah wallet</button>
+                                </div>
+                                <select name="wallet_id" id="expense_wallet_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-300 focus:bg-white focus:ring-0">
+                                    @foreach($wallets as $wallet)
+                                    <option value="{{ $wallet->id }}">{{ $wallet->bank_name }} ({{ number_format($wallet->balance) }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <div class="mb-2 flex items-center justify-between">
+                                    <label class="text-xs font-bold text-slate-500">Kategori</label>
+                                    <button type="button" onclick="openQuickAdd('expense')" class="text-xs font-bold text-rose-600 hover:text-rose-700">+ Tambah kategori</button>
+                                </div>
+                                <select name="category_id" id="expense_category_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-300 focus:bg-white focus:ring-0">
+                                    @foreach($expenseCategories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-[170px_minmax(0,1fr)]">
+                            <div>
+                                <label class="mb-2 block text-xs font-bold text-slate-500">Tanggal</label>
+                                <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-300 focus:bg-white focus:ring-0">
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-xs font-bold text-slate-500">Catatan</label>
+                                <input type="text" name="description" placeholder="Contoh: belanja stok, listrik, operasional" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:border-rose-300 focus:bg-white focus:ring-0">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full rounded-2xl bg-rose-500 px-4 py-3.5 text-sm font-bold text-white shadow-[0_18px_35px_rgba(244,63,94,0.22)] transition hover:-translate-y-0.5 hover:bg-rose-600">
+                            Simpan Pengeluaran
+                        </button>
+                    </form>
                 </div>
-
-                <div class="px-5 pb-6">
-                    @if($errors->any())
-                    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-xs font-medium flex items-start gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="8" x2="12" y2="12" />
-                            <line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                        <ul class="list-none space-y-1">
-                            @foreach($errors->all() as $error) <li>{{ $error }}</li> @endforeach
-                        </ul>
-                    </div>
-                    @endif
-
-                    <style>
-                        input[type=number]::-webkit-inner-spin-button,
-                        input[type=number]::-webkit-outer-spin-button {
-                            -webkit-appearance: none;
-                            margin: 0;
-                        }
-
-                        input[type=number] {
-                            -moz-appearance: textfield;
-                        }
-
-                    </style>
-
-                    <div id="form-income" class="block animate-fade-in">
-                        <form action="{{ route('income.store') }}" method="POST">
-                            @csrf
-
-                            <div class="mb-6">
-                                <label class="block text-xs font-bold text-bgray-400 uppercase tracking-wider mb-2">Nominal Masuk</label>
-                                <div class="group relative flex items-center w-full rounded-2xl bg-gray-50 border-2 border-gray-100 focus-within:border-success-300 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-success-100/20 transition-all duration-300 ease-out dark:bg-darkblack-500 dark:border-darkblack-400">
-                                    <div class="pl-4 pr-2 pointer-events-none">
-                                        <span class="text-2xl font-black text-gray-300 group-focus-within:text-success-400 transition-colors duration-300">Rp</span>
-                                    </div>
-                                    <input type="number" name="amount" class="w-full bg-transparent border-none py-4 pr-4 text-2xl font-black text-gray-900 placeholder-gray-200 focus:ring-0 dark:text-white dark:placeholder-gray-600" placeholder="0" required>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <div class="flex justify-between items-center mb-1.5">
-                                        <label class="text-xs font-bold text-bgray-500">Ke Bank</label>
-                                        <button type="button" onclick="addBank()" class="text-[10px] font-bold text-success-300 hover:underline">+ Baru</button>
-                                    </div>
-                                    <div class="relative">
-                                        <select name="wallet_id" id="income_wallet_id" class="w-full appearance-none rounded-lg border border-bgray-200 px-3 py-2.5 text-sm font-bold text-bgray-700 focus:border-success-300 focus:ring-0 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white cursor-pointer transition-all hover:border-success-200">
-                                            @foreach($wallets as $wallet)
-                                            <option value="{{ $wallet->id }}">{{ $wallet->bank_name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-bgray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M6 9l6 6 6-6" /></svg></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between items-center mb-1.5">
-                                        <label class="text-xs font-bold text-bgray-500">Kategori</label>
-                                        <button type="button" onclick="addCategory('income')" class="text-[10px] font-bold text-success-300 hover:underline">+ Baru</button>
-                                    </div>
-                                    <div class="relative">
-                                        <select name="category_id" id="income_category_id" class="w-full appearance-none rounded-lg border border-bgray-200 px-3 py-2.5 text-sm font-bold text-bgray-700 focus:border-success-300 focus:ring-0 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white cursor-pointer transition-all hover:border-success-200">
-                                            @foreach($incomeCategories as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-bgray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M6 9l6 6 6-6" /></svg></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-xs font-bold text-bgray-500 mb-1.5">Detail</label>
-                                <div class="flex gap-3">
-                                    <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-1/3 rounded-lg border border-bgray-200 text-xs font-medium focus:border-success-300 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white">
-                                    <input type="text" name="description" placeholder="Catatan (Opsional)" class="w-2/3 rounded-lg border border-bgray-200 text-xs font-medium focus:border-success-300 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white">
-                                </div>
-                            </div>
-
-                            <button type="submit" class="w-full rounded-xl bg-success-300 py-3.5 text-sm font-bold text-white shadow-lg shadow-success-300/30 hover:bg-success-400 hover:-translate-y-0.5 transition-all active:scale-95">
-                                Simpan Pemasukan
-                            </button>
-                        </form>
-                    </div>
-
-                    <div id="form-expense" class="hidden animate-fade-in">
-                        <form action="{{ route('expense.store') }}" method="POST">
-                            @csrf
-
-                            <div class="mb-6">
-                                <label class="block text-xs font-bold text-bgray-400 uppercase tracking-wider mb-2">Nominal Keluar</label>
-                                <div class="group relative flex items-center w-full rounded-2xl bg-gray-50 border-2 border-gray-100 focus-within:border-error-300 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-error-100/20 transition-all duration-300 ease-out dark:bg-darkblack-500 dark:border-darkblack-400">
-                                    <div class="pl-4 pr-2 pointer-events-none">
-                                        <span class="text-2xl font-black text-gray-300 group-focus-within:text-error-400 transition-colors duration-300">Rp</span>
-                                    </div>
-                                    <input type="number" name="amount" class="w-full bg-transparent border-none py-4 pr-4 text-2xl font-black text-gray-900 placeholder-gray-200 focus:ring-0 dark:text-white dark:placeholder-gray-600" placeholder="0" required>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <div class="flex justify-between items-center mb-1.5">
-                                        <label class="text-xs font-bold text-bgray-500">Dari Bank</label>
-                                        <button type="button" onclick="addBank()" class="text-[10px] font-bold text-error-300 hover:underline">+ Baru</button>
-                                    </div>
-                                    <div class="relative">
-                                        <select name="wallet_id" id="expense_wallet_id" class="w-full appearance-none rounded-lg border border-bgray-200 px-3 py-2.5 text-sm font-bold text-bgray-700 focus:border-error-300 focus:ring-0 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white cursor-pointer transition-all hover:border-error-200">
-                                            @foreach($wallets as $wallet)
-                                            <option value="{{ $wallet->id }}">{{ $wallet->bank_name }} ({{ number_format($wallet->balance) }})</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-bgray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M6 9l6 6 6-6" /></svg></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between items-center mb-1.5">
-                                        <label class="text-xs font-bold text-bgray-500">Kategori</label>
-                                        <button type="button" onclick="addCategory('expense')" class="text-[10px] font-bold text-error-300 hover:underline">+ Baru</button>
-                                    </div>
-                                    <div class="relative">
-                                        <select name="category_id" id="expense_category_id" class="w-full appearance-none rounded-lg border border-bgray-200 px-3 py-2.5 text-sm font-bold text-bgray-700 focus:border-error-300 focus:ring-0 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white cursor-pointer transition-all hover:border-error-200">
-                                            @foreach($expenseCategories as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-bgray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M6 9l6 6 6-6" /></svg></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-xs font-bold text-bgray-500 mb-1.5">Detail</label>
-                                <div class="flex gap-3">
-                                    <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-1/3 rounded-lg border border-bgray-200 text-xs font-medium focus:border-error-300 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white">
-                                    <input type="text" name="description" placeholder="Keperluan..." class="w-2/3 rounded-lg border border-bgray-200 text-xs font-medium focus:border-error-300 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white">
-                                </div>
-                            </div>
-
-                            <button type="submit" class="w-full rounded-xl bg-error-300 py-3.5 text-sm font-bold text-white shadow-lg shadow-error-300/30 hover:bg-error-400 hover:-translate-y-0.5 transition-all active:scale-95">
-                                Simpan Pengeluaran
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
+            </section>
         </div>
 
-        <div class="w-full xl:w-2/3">
-            <div class="rounded-2xl bg-white p-6 dark:bg-darkblack-600 shadow-sm border border-bgray-100 dark:border-darkblack-400">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-bgray-100 text-bgray-500 dark:bg-darkblack-500 dark:text-white">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-bgray-900 dark:text-white">Riwayat Terbaru</h3>
-                            <p class="text-xs text-bgray-500">5 transaksi terakhir Anda</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold text-bgray-500 bg-bgray-100 px-3 py-1 rounded-full dark:bg-darkblack-500">{{ date('F Y') }}</span>
+        <section class="app-panel p-6">
+            <div class="flex flex-col gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <p class="app-eyebrow">Recent Activity</p>
+                    <h2 class="mt-3 text-2xl font-black tracking-tight text-slate-950">Riwayat transaksi terbaru</h2>
+                    <p class="mt-2 text-sm text-slate-500">Pantau transaksi terakhir dan edit langsung jika ada input yang perlu dibetulkan.</p>
                 </div>
+                <div class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-500">
+                    {{ date('F Y') }}
+                </div>
+            </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full whitespace-nowrap">
-                        <thead>
-                            <tr class="text-left border-b border-bgray-100 dark:border-darkblack-400">
-                                <th class="px-4 py-3 text-xs font-bold text-bgray-400 uppercase tracking-wider">Detail</th>
-                                <th class="px-4 py-3 text-xs font-bold text-bgray-400 uppercase tracking-wider">Bank</th>
-                                <th class="px-4 py-3 text-right text-xs font-bold text-bgray-400 uppercase tracking-wider">Nominal</th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-bgray-400 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-bgray-100 dark:divide-darkblack-500">
-                            @forelse($transactions as $data)
-                            <tr class="hover:bg-bgray-50 dark:hover:bg-darkblack-500 transition-colors group">
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-4">
-                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $data->type == 'income' ? 'bg-success-100 text-success-300' : ($data->type == 'expense' ? 'bg-error-100 text-error-300' : 'bg-warning-100 text-warning-300') }}">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                @if($data->type == 'income')
-                                                <path d="M12 19V5M5 12l7-7 7 7" />
-                                                @elseif($data->type == 'expense')
-                                                <path d="M12 5v14M12 19l4-4M12 19l-4-4" />
-                                                @else
-                                                <path d="M17 8L21 12L17 16M3 12H20M7 16L3 12L7 8" /> @endif
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-bold text-bgray-900 dark:text-white">{{ $data->category->name ?? 'Transfer' }}</p>
-                                            <p class="text-[11px] text-bgray-500">{{ \Carbon\Carbon::parse($data->date)->format('d M') }} • {{ Str::limit($data->description, 20) }}</p>
-                                        </div>
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full min-w-[720px] text-left">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-xs font-bold uppercase tracking-[0.24em] text-slate-400">
+                            <th class="px-4 py-3">Detail</th>
+                            <th class="px-4 py-3">Wallet</th>
+                            <th class="px-4 py-3">Kategori</th>
+                            <th class="px-4 py-3 text-right">Nominal</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($transactions as $data)
+                        <tr class="group transition hover:bg-slate-50/80">
+                            <td class="px-4 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $data->type == 'income' ? 'bg-emerald-100 text-emerald-600' : ($data->type == 'expense' ? 'bg-rose-100 text-rose-500' : 'bg-amber-100 text-amber-600') }}">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                            @if($data->type == 'income')
+                                            <path d="M12 5v14M12 5l4 4M12 5L8 9" />
+                                            @elseif($data->type == 'expense')
+                                            <path d="M12 19V5M12 19l4-4M12 19l-4-4" />
+                                            @else
+                                            <path d="M17 8L21 12L17 16M3 12H20M7 16L3 12L7 8" />
+                                            @endif
+                                        </svg>
                                     </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="inline-block rounded-lg bg-bgray-50 border border-bgray-100 px-2.5 py-1 text-xs font-bold text-bgray-600 dark:bg-darkblack-500 dark:border-darkblack-400 dark:text-white">
-                                        {{ $data->wallet->bank_name }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-right">
-                                    <span class="text-sm font-black tracking-tight {{ $data->type == 'income' ? 'text-success-300' : ($data->type == 'expense' ? 'text-error-300' : 'text-warning-300') }}">
-                                        {{ $data->type == 'income' ? '+' : ($data->type == 'expense' ? '-' : '') }}
-                                        Rp {{ number_format($data->amount, 0, ',', '.') }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <a href="{{ route('transactions.edit', $data->id) }}" class="p-2 rounded-lg text-bgray-400 hover:text-warning-300 hover:bg-warning-50 transition-colors">
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-900">{{ $data->description ?: 'Tanpa catatan' }}</p>
+                                        <p class="mt-1 text-xs text-slate-500">{{ \Carbon\Carbon::parse($data->date)->format('d M Y') }} | {{ ucfirst($data->type) }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-600">
+                                    {{ $data->wallet->bank_name }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="text-sm font-semibold text-slate-700">{{ $data->category->name ?? 'Transfer' }}</span>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <span class="text-sm font-black tracking-tight {{ $data->type == 'income' ? 'text-emerald-600' : ($data->type == 'expense' ? 'text-rose-500' : 'text-amber-600') }}">
+                                    {{ $data->type == 'income' ? '+' : ($data->type == 'expense' ? '-' : '') }} Rp {{ number_format($data->amount, 0, ',', '.') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <a href="{{ route('transactions.edit', $data->id) }}" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600" aria-label="Edit transaksi" title="Edit transaksi">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                    </a>
+                                    <form action="{{ route('transactions.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500" aria-label="Hapus transaksi" title="Hapus transaksi">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                        </a>
-                                        <form action="{{ route('transactions.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Hapus?');">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="p-2 rounded-lg text-bgray-400 hover:text-error-300 hover:bg-error-50 transition-colors">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <polyline points="3 6 5 6 21 6" />
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-12 text-gray-400 text-sm">
-                                    <div class="flex flex-col items-center gap-2">
-                                        <svg class="w-10 h-10 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <polyline points="3 6 5 6 21 6" />
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-14 text-center">
+                                <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
+                                    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
-                                        Belum ada data transaksi.
                                     </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-6">
-                    {{ $transactions->links('pagination::simple-tailwind') }}
-                </div>
+                                    <div>
+                                        <p class="text-base font-bold text-slate-700">Belum ada transaksi</p>
+                                        <p class="mt-1 text-sm">Mulai dari form di sebelah kiri untuk membangun histori keuangan Anda.</p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+
+            <div class="mt-6 border-t border-slate-200 pt-4">
+                {{ $transactions->links('pagination::simple-tailwind') }}
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="quick-add-modal" class="app-modal" aria-hidden="true">
+    <div class="app-modal__backdrop" onclick="closeQuickAdd()"></div>
+    <div class="app-modal__panel p-6 sm:p-7" role="dialog" aria-modal="true" aria-labelledby="quick-add-title">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800">
+            <div>
+                <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Tambah Cepat</p>
+                <h2 id="quick-add-title" class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Tambah data</h2>
+                <p id="quick-add-help" class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Data baru langsung muncul di pilihan transaksi.</p>
+            </div>
+            <button type="button" onclick="closeQuickAdd()" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" aria-label="Tutup modal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                </svg>
+            </button>
         </div>
 
+        <form id="quick-add-form" class="mt-6 space-y-5">
+            <input type="hidden" id="quick-add-kind" value="wallet">
+            <div>
+                <label for="quick-add-name" class="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-100">Nama</label>
+                <input id="quick-add-name" type="text" class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:bg-white focus:ring-0 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500" required>
+            </div>
+            <div id="quick-add-balance-wrap">
+                <label for="quick-add-balance" class="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-100">Saldo awal</label>
+                <div class="relative">
+                    <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+                    <input id="quick-add-balance" type="number" value="0" class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-10 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-teal-300 focus:bg-white focus:ring-0 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                </div>
+            </div>
+            <div id="quick-add-message" class="hidden rounded-2xl border px-4 py-3 text-sm font-semibold"></div>
+            <button type="submit" class="w-full rounded-2xl bg-slate-950 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-900 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100">
+                Simpan dan Pakai
+            </button>
+        </form>
     </div>
 </div>
 @endsection
@@ -335,92 +375,136 @@
             formIncome.classList.remove('hidden');
             formExpense.classList.add('hidden');
 
-            // Tab Style Active (Income) - White bg + Shadow + Green Text
-            tabIncome.classList.add('bg-white', 'text-success-300', 'shadow-sm', 'dark:bg-darkblack-600');
-            tabIncome.classList.remove('text-bgray-500', 'hover:text-bgray-700');
+            tabIncome.classList.add('bg-white', 'text-emerald-600', 'shadow-sm');
+            tabIncome.classList.remove('text-slate-500');
 
-            // Tab Style Inactive (Expense)
-            tabExpense.classList.remove('bg-white', 'text-error-300', 'shadow-sm', 'dark:bg-darkblack-600');
-            tabExpense.classList.add('text-bgray-500', 'hover:text-bgray-700');
-
+            tabExpense.classList.remove('bg-white', 'text-rose-500', 'shadow-sm');
+            tabExpense.classList.add('text-slate-500');
         } else {
             formExpense.classList.remove('hidden');
             formIncome.classList.add('hidden');
 
-            // Tab Style Active (Expense) - White bg + Shadow + Red Text
-            tabExpense.classList.add('bg-white', 'text-error-300', 'shadow-sm', 'dark:bg-darkblack-600');
-            tabExpense.classList.remove('text-bgray-500', 'hover:text-bgray-700');
+            tabExpense.classList.add('bg-white', 'text-rose-500', 'shadow-sm');
+            tabExpense.classList.remove('text-slate-500');
 
-            // Tab Style Inactive (Income)
-            tabIncome.classList.remove('bg-white', 'text-success-300', 'shadow-sm', 'dark:bg-darkblack-600');
-            tabIncome.classList.add('text-bgray-500', 'hover:text-bgray-700');
+            tabIncome.classList.remove('bg-white', 'text-emerald-600', 'shadow-sm');
+            tabIncome.classList.add('text-slate-500');
         }
     }
 
-    // Set default active tab style
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('tab') === 'expense') {
-            switchTab('expense');
-        } else {
-            switchTab('income'); // Default Style Trigger
+        switchTab(urlParams.get('tab') === 'expense' ? 'expense' : 'income');
+    });
+
+    const quickAddModal = document.getElementById('quick-add-modal');
+    const quickAddForm = document.getElementById('quick-add-form');
+    const quickAddKind = document.getElementById('quick-add-kind');
+    const quickAddName = document.getElementById('quick-add-name');
+    const quickAddBalance = document.getElementById('quick-add-balance');
+    const quickAddBalanceWrap = document.getElementById('quick-add-balance-wrap');
+    const quickAddTitle = document.getElementById('quick-add-title');
+    const quickAddHelp = document.getElementById('quick-add-help');
+    const quickAddMessage = document.getElementById('quick-add-message');
+
+    function openQuickAdd(kind) {
+        quickAddKind.value = kind;
+        quickAddForm.reset();
+        quickAddBalance.value = '0';
+        quickAddMessage.className = 'hidden rounded-2xl border px-4 py-3 text-sm font-semibold';
+        quickAddMessage.textContent = '';
+
+        const isWallet = kind === 'wallet';
+        quickAddTitle.textContent = isWallet ? 'Tambah wallet baru' : 'Tambah kategori baru';
+        quickAddHelp.textContent = isWallet
+            ? 'Wallet baru langsung tersedia untuk pemasukan dan pengeluaran.'
+            : `Kategori ${kind === 'income' ? 'pemasukan' : 'pengeluaran'} baru langsung tersedia di form aktif.`;
+        quickAddName.placeholder = isWallet ? 'Contoh: BCA, Jago, GoPay' : 'Contoh: Belanja Harian, Gaji';
+        quickAddBalanceWrap.classList.toggle('hidden', !isWallet);
+        quickAddModal.classList.add('is-open');
+        quickAddModal.setAttribute('aria-hidden', 'false');
+
+        setTimeout(() => quickAddName.focus(), 50);
+    }
+
+    function closeQuickAdd() {
+        quickAddModal.classList.remove('is-open');
+        quickAddModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function showQuickAddMessage(message, isError = false) {
+        quickAddMessage.textContent = message;
+        quickAddMessage.className = isError
+            ? 'rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200'
+            : 'rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200';
+    }
+
+    function addOption(selectId, text, value, selected = true) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.add(new Option(text, value, selected, selected), undefined);
+    }
+
+    quickAddForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const kind = quickAddKind.value;
+        const name = quickAddName.value.trim();
+
+        if (!name) {
+            showQuickAddMessage('Nama wajib diisi.', true);
+            return;
+        }
+
+        const button = quickAddForm.querySelector('button[type="submit"]');
+        button.disabled = true;
+        button.textContent = 'Menyimpan...';
+
+        try {
+            const isWallet = kind === 'wallet';
+            const response = await fetch(isWallet ? "{{ route('wallets.storeAjax') }}" : "{{ route('categories.storeAjax') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(isWallet ? {
+                    bank_name: name,
+                    balance: quickAddBalance.value || 0
+                } : {
+                    name: name,
+                    type: kind
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Data belum bisa disimpan.');
+            }
+
+            if (isWallet) {
+                addOption('income_wallet_id', result.data.bank_name, result.data.id);
+                addOption('expense_wallet_id', `${result.data.bank_name} (${Number(quickAddBalance.value || 0).toLocaleString('id-ID')})`, result.data.id);
+                showQuickAddMessage('Wallet berhasil ditambahkan.');
+            } else {
+                addOption(kind === 'income' ? 'income_category_id' : 'expense_category_id', result.data.name, result.data.id);
+                showQuickAddMessage('Kategori berhasil ditambahkan.');
+            }
+
+            setTimeout(closeQuickAdd, 450);
+        } catch (error) {
+            showQuickAddMessage(error.message || 'Gagal menambahkan data.', true);
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Simpan dan Pakai';
         }
     });
 
-    async function addBank() {
-        let name = prompt("Nama Bank Baru:");
-        if (!name) return;
-        let initialBalance = prompt("Saldo Awal (0 jika kosong):", "0");
-        try {
-            let response = await fetch("{{ route('wallets.storeAjax') }}", {
-                method: "POST"
-                , headers: {
-                    "Content-Type": "application/json"
-                    , "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                }
-                , body: JSON.stringify({
-                    bank_name: name
-                    , balance: initialBalance
-                })
-            });
-            let result = await response.json();
-            if (result.success) {
-                let newOption = new Option(result.data.bank_name, result.data.id, true, true);
-                document.getElementById('income_wallet_id').add(newOption, undefined);
-                document.getElementById('expense_wallet_id').add(newOption.cloneNode(true), undefined);
-                alert("Bank ditambahkan!");
-            }
-        } catch (e) {
-            alert("Gagal.");
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && quickAddModal.classList.contains('is-open')) {
+            closeQuickAdd();
         }
-    }
-
-    async function addCategory(type) {
-        let name = prompt("Nama Kategori Baru:");
-        if (!name) return;
-        try {
-            let response = await fetch("{{ route('categories.storeAjax') }}", {
-                method: "POST"
-                , headers: {
-                    "Content-Type": "application/json"
-                    , "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                }
-                , body: JSON.stringify({
-                    name: name
-                    , type: type
-                })
-            });
-            let result = await response.json();
-            if (result.success) {
-                let newOption = new Option(result.data.name, result.data.id, true, true);
-                let targetId = type === 'income' ? 'income_category_id' : 'expense_category_id';
-                document.getElementById(targetId).add(newOption, undefined);
-                alert("Kategori ditambahkan!");
-            }
-        } catch (e) {
-            alert("Gagal.");
-        }
-    }
-
+    });
 </script>
 @endpush

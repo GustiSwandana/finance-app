@@ -9,18 +9,26 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 class TransactionDetailExport implements FromView, ShouldAutoSize
 {
     protected $transactions;
+    protected $filters;
 
-    // Terima data transaksi dari Controller
-    public function __construct($transactions)
+    public function __construct($transactions, array $filters = [])
     {
         $this->transactions = $transactions;
+        $this->filters = $filters;
     }
 
     public function view(): View
     {
-        // Kita akan menggunakan view khusus cetak yang bersih
+        $totalIn = $this->transactions->where('type', 'income')->sum('amount');
+        $totalOut = $this->transactions->where('type', 'expense')->sum('amount');
+
         return view('reports.print_detail', [
-            'transactions' => $this->transactions
+            'transactions' => $this->transactions,
+            'totalIncome' => $totalIn,
+            'totalExpense' => $totalOut,
+            'netBalance' => $totalIn - $totalOut,
+            'startDate' => $this->filters['startDate'] ?? now()->startOfMonth()->toDateString(),
+            'endDate' => $this->filters['endDate'] ?? now()->toDateString(),
         ]);
     }
 }

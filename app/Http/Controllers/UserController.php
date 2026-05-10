@@ -2,113 +2,115 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Users\StoreUserRequest;
+use App\Http\Requests\Users\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    // 1. Daftar User
     public function index()
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(10);
+        $users = User::query()
+            ->orderByRaw("role = 'admin' desc")
+            ->orderBy('name')
+            ->paginate(10);
+
         return view('users.index', compact('users'));
     }
 
-    // 2. Form Tambah
     public function create()
     {
         return view('users.create');
     }
 
-    // 3. Simpan User Baru
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $validated = $request->validated();
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'is_active' => $request->boolean('is_active'),
+            'password' => Hash::make($validated['password']),
         ]);
 
         return redirect()->route('users.index')->with('success', 'User baru berhasil ditambahkan!');
     }
 
-    // 4. Form Edit
     public function edit(User $user)
     {
-        // PROTEKSI: Cek apakah user yang login adalah pemilik akun ini
-        if ($user->id !== Auth::id()) {
-            return redirect()->route('users.index')->withErrors(['msg' => 'Akses Ditolak! Anda hanya bisa mengedit profil sendiri.']);
-        }
-
         return view('users.edit', compact('user'));
     }
 
-    // 5. Update User
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        // Proteksi (Hanya admin/diri sendiri yang boleh edit)
-        if ($user->id !== Auth::id()) {
-            abort(403, 'UNAUTHORIZED ACTION');
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|string|min:8|confirmed',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi Gambar Max 2MB
-        ]);
+        $validated = $request->validated();
 
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'is_active' => $request->boolean('is_active'),
         ];
 
-        // 1. Cek apakah ada file foto yang diupload?
         if ($request->hasFile('avatar')) {
-
-            // Hapus foto lama jika ada (biar gak nyampah)
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
 
-            // Simpan foto baru ke folder 'avatars'
             $path = $request->file('avatar')->store('avatars', 'public');
             $data['avatar'] = $path;
         }
 
-        // 2. Cek apakah password diganti?
         if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = Hash::make($validated['password']);
         }
+
+        $this->ensureUserManagementKeepsAnActiveAdmin($user, $data);
 
         $user->update($data);
 
-        return redirect()->route('users.index')->with('success', 'Profil berhasil diperbarui!');
+        return redirect()->route('users.index')->with('success', 'Data user berhasil diperbarui!');
     }
 
-    // 6. Hapus User
     public function destroy(User $user)
     {
-        // Biasanya User tidak boleh menghapus dirinya sendiri sembarangan,
-        // Tapi jika idenya "User tidak boleh hapus ORANG LAIN", kodenya begini:
+        $this->ensureUserManagementKeepsAnActiveAdmin($user, null, true);
 
-        if ($user->id !== Auth::id()) {
-            return back()->withErrors(['msg' => 'Anda tidak berhak menghapus user lain!']);
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
         }
 
-        // Tapi biasanya di aplikasi, user tidak bisa hapus akun sendiri lewat menu index,
-        // jadi kita bisa matikan fungsi destroy atau biarkan untuk admin saja nanti.
-        // Untuk sekarang, kita return error saja biar aman.
-        return back()->withErrors(['msg' => 'Penghapusan akun dinonaktifkan demi keamanan.']);
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
+    }
+
+    protected function ensureUserManagementKeepsAnActiveAdmin(User $user, ?array $data = null, bool $isDeleting = false): void
+    {
+        $nextRole = $data['role'] ?? $user->role;
+        $nextActive = $data['is_active'] ?? $user->is_active;
+
+        $removesAdminAccess = $isDeleting || $nextRole !== 'admin' || ! $nextActive;
+
+        if ($user->role !== 'admin' || ! $user->is_active || ! $removesAdminAccess) {
+            return;
+        }
+
+        $otherActiveAdminExists = User::query()
+            ->where('role', 'admin')
+            ->where('is_active', true)
+            ->whereKeyNot($user->id)
+            ->exists();
+
+        if (! $otherActiveAdminExists) {
+            throw ValidationException::withMessages([
+                'role' => 'Aplikasi harus memiliki minimal satu admin aktif.',
+            ]);
+        }
     }
 }

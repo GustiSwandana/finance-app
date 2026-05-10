@@ -1,164 +1,192 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto">
-    
-    <div class="mb-8 flex items-center gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-900 text-white shadow-lg dark:bg-white dark:text-gray-900">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-8">
+    <section class="app-hero px-6 py-7 md:px-8 md:py-8">
+        <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <p class="app-eyebrow">Debt Tracker</p>
+                <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Kelola utang dan piutang tanpa kehilangan konteks.</h1>
+                <p class="mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
+                    Catat siapa berutang, kapan jatuh tempo, dan wallet mana yang terdampak saat pelunasan dilakukan. Tampilan ini memisahkan aset dan kewajiban agar lebih cepat dipantau.
+                </p>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div class="min-w-[180px] rounded-[24px] border border-white/15 bg-slate-950/35 px-4 py-4 backdrop-blur-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Piutang</p>
+                    <p class="mt-3 text-3xl font-black text-emerald-300">{{ $receivables->count() }}</p>
+                    <p class="mt-2 text-xs text-white/65">Tagihan masuk</p>
+                </div>
+                <div class="min-w-[180px] rounded-[24px] border border-white/15 bg-slate-950/35 px-4 py-4 backdrop-blur-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Utang</p>
+                    <p class="mt-3 text-3xl font-black text-rose-300">{{ $payables->count() }}</p>
+                    <p class="mt-2 text-xs text-white/65">Kewajiban aktif</p>
+                </div>
+            </div>
         </div>
-        <div>
-            <h2 class="text-2xl font-bold text-bgray-900 dark:text-white">Utang & Piutang</h2>
-            <p class="text-sm text-bgray-500 dark:text-bgray-400">Kelola pinjaman Anda dan teman Anda.</p>
-        </div>
-    </div>
+    </section>
 
     @if($errors->any())
-        <div class="mb-6 p-4 rounded-lg bg-red-100 border border-red-200 text-red-600 text-sm">
-            {{ $errors->first() }}
-        </div>
+    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        {{ $errors->first() }}
+    </div>
     @endif
 
-    <div class="mb-8 rounded-2xl bg-white p-6 dark:bg-darkblack-600 shadow-sm border border-bgray-100 dark:border-darkblack-400">
-        <h3 class="mb-4 text-lg font-bold text-bgray-900 dark:text-white">Catat Pinjaman Baru</h3>
-        <form action="{{ route('debts.store') }}" method="POST">
+    <section class="app-panel p-6">
+        <div class="flex flex-col gap-2 border-b border-slate-200 pb-5">
+            <p class="app-eyebrow">New Entry</p>
+            <h2 class="text-2xl font-black tracking-tight text-slate-950">Catat pinjaman baru</h2>
+            <p class="text-sm text-slate-500">Simpan data dasar dulu. Detail lain bisa Anda edit lagi nanti jika diperlukan.</p>
+        </div>
+
+        <form action="{{ route('debts.store') }}" method="POST" class="mt-6 space-y-5">
             @csrf
-            <div class="grid gap-4 md:grid-cols-5 items-end">
-                <div class="md:col-span-1">
-                    <label class="text-xs font-bold text-bgray-500 uppercase mb-2 block">Jenis</label>
-                    <select name="type" class="w-full rounded-lg border-bgray-300 text-sm focus:border-success-300 dark:bg-darkblack-500 dark:text-white">
-                        <option value="receivable">Orang Utang ke Saya (Piutang)</option>
-                        <option value="payable">Saya Utang ke Orang</option>
+            <div class="grid gap-4 md:grid-cols-5">
+                <div>
+                    <label class="mb-2 block text-xs font-bold text-slate-500">Jenis</label>
+                    <select name="type" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:bg-white focus:ring-0">
+                        <option value="receivable">Piutang</option>
+                        <option value="payable">Utang</option>
                     </select>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="text-xs font-bold text-bgray-500 uppercase mb-2 block">Nama Orang</label>
-                    <input type="text" name="name" class="w-full rounded-lg border-bgray-300 text-sm dark:bg-darkblack-500 dark:text-white" placeholder="Nama..." required>
+                <div>
+                    <label class="mb-2 block text-xs font-bold text-slate-500">Nama orang</label>
+                    <input type="text" name="name" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0" placeholder="Nama pihak terkait" required>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="text-xs font-bold text-bgray-500 uppercase mb-2 block">Jumlah (Rp)</label>
-                    <input type="number" name="amount" class="w-full rounded-lg border-bgray-300 text-sm font-bold dark:bg-darkblack-500 dark:text-white" placeholder="0" required>
+                <div>
+                    <label class="mb-2 block text-xs font-bold text-slate-500">Jumlah</label>
+                    <input type="number" name="amount" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0" placeholder="0" required>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="text-xs font-bold text-bgray-500 uppercase mb-2 block">Via Bank</label>
-                    <select name="wallet_id" class="w-full rounded-lg border-bgray-300 text-sm dark:bg-darkblack-500 dark:text-white">
+                <div>
+                    <label class="mb-2 block text-xs font-bold text-slate-500">Wallet</label>
+                    <select name="wallet_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0">
                         @foreach($wallets as $w)
-                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
+                        <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="md:col-span-1">
-                    <button type="submit" class="w-full rounded-lg bg-bgray-900 py-2.5 text-sm font-bold text-white hover:bg-black dark:bg-white dark:text-bgray-900 transition-all">
+                <div class="flex items-end">
+                    <button type="submit" class="w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-900">
                         Simpan Data
                     </button>
                 </div>
             </div>
-            
-            <div class="mt-4 grid gap-4 md:grid-cols-2">
+
+            <div class="grid gap-4 md:grid-cols-2">
                 <div>
-                    <label class="text-xs font-bold text-bgray-500 uppercase mb-1 block">Jatuh Tempo (Opsional)</label>
-                    <input type="date" name="due_date" class="w-full rounded-lg border-bgray-300 text-xs dark:bg-darkblack-500 dark:text-white">
+                    <label class="mb-2 block text-xs font-bold text-slate-500">Jatuh tempo</label>
+                    <input type="date" name="due_date" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-bgray-500 uppercase mb-1 block">Catatan (Opsional)</label>
-                    <input type="text" name="description" class="w-full rounded-lg border-bgray-300 text-xs dark:bg-darkblack-500 dark:text-white" placeholder="Ex: Beli Pulsa">
+                    <label class="mb-2 block text-xs font-bold text-slate-500">Catatan</label>
+                    <input type="text" name="description" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0" placeholder="Contoh: pinjaman operasional, beli pulsa">
                 </div>
             </div>
         </form>
-    </div>
+    </section>
 
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        
-        <div>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-success-300">Piutang (Aset)</h3>
-                <span class="text-xs font-medium bg-success-50 text-success-300 px-3 py-1 rounded-full">Orang pinjam ke saya</span>
-            </div>
-            
-            @if($receivables->isEmpty())
-                <div class="rounded-xl border-2 border-dashed border-bgray-300 p-8 text-center text-bgray-400">Tidak ada yang berhutang ke Anda.</div>
-            @else
-                <div class="flex flex-col gap-4">
-                    @foreach($receivables as $debt)
-                        <div class="rounded-xl bg-white p-5 shadow-sm border-l-4 border-success-300 dark:bg-darkblack-600">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-lg font-bold text-bgray-900 dark:text-white">{{ $debt->name }}</h4>
-                                    <p class="text-xs text-bgray-500">{{ $debt->description ?? 'Tanpa catatan' }}</p>
-                                    @if($debt->due_date)
-                                        <p class="text-xs text-error-300 mt-1 font-medium">Jatuh tempo: {{ $debt->due_date->format('d M Y') }}</p>
-                                    @endif
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xl font-bold text-success-300">Rp {{ number_format($debt->amount, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 pt-3 border-t border-bgray-100 dark:border-darkblack-500">
-                                <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="flex gap-2 items-center justify-end">
-                                    @csrf
-                                    <span class="text-xs text-bgray-500">Masuk ke:</span>
-                                    <select name="wallet_id" class="text-xs rounded border-bgray-200 py-1 pr-6 dark:bg-darkblack-500 dark:text-white">
-                                        @foreach($wallets as $w)
-                                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="submit" class="px-3 py-1.5 rounded bg-success-50 text-success-300 text-xs font-bold hover:bg-success-300 hover:text-white transition-colors" onclick="return confirm('Yakin {{ $debt->name }} sudah bayar lunas? Saldo akan bertambah.')">
-                                        Sudah Lunas
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    @endforeach
+    <div class="grid gap-8 xl:grid-cols-2">
+        <section class="app-panel p-6">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-200 pb-5">
+                <div>
+                    <p class="app-eyebrow">Receivables</p>
+                    <h2 class="mt-3 text-2xl font-black tracking-tight text-slate-950">Piutang aktif</h2>
+                    <p class="mt-2 text-sm text-slate-500">Dana yang harus kembali ke Anda.</p>
                 </div>
-            @endif
-        </div>
-
-        <div>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-error-300">Utang Saya (Kewajiban)</h3>
-                <span class="text-xs font-medium bg-error-50 text-error-300 px-3 py-1 rounded-full">Saya pinjam uang orang</span>
+                <span class="rounded-full bg-emerald-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">{{ $receivables->count() }} data</span>
             </div>
 
-            @if($payables->isEmpty())
-                <div class="rounded-xl border-2 border-dashed border-bgray-300 p-8 text-center text-bgray-400">Anda bebas utang!</div>
-            @else
-                <div class="flex flex-col gap-4">
-                    @foreach($payables as $debt)
-                        <div class="rounded-xl bg-white p-5 shadow-sm border-l-4 border-error-300 dark:bg-darkblack-600">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-lg font-bold text-bgray-900 dark:text-white">{{ $debt->name }}</h4>
-                                    <p class="text-xs text-bgray-500">{{ $debt->description ?? 'Tanpa catatan' }}</p>
-                                    @if($debt->due_date)
-                                        <p class="text-xs text-error-300 mt-1 font-medium">Jatuh tempo: {{ $debt->due_date->format('d M Y') }}</p>
-                                    @endif
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xl font-bold text-error-300">Rp {{ number_format($debt->amount, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 pt-3 border-t border-bgray-100 dark:border-darkblack-500">
-                                <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="flex gap-2 items-center justify-end">
-                                    @csrf
-                                    <span class="text-xs text-bgray-500">Ambil dari:</span>
-                                    <select name="wallet_id" class="text-xs rounded border-bgray-200 py-1 pr-6 dark:bg-darkblack-500 dark:text-white">
-                                        @foreach($wallets as $w)
-                                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="submit" class="px-3 py-1.5 rounded bg-error-50 text-error-300 text-xs font-bold hover:bg-error-300 hover:text-white transition-colors" onclick="return confirm('Lunasi utang ini sekarang? Saldo akan berkurang.')">
-                                        Bayar Lunas
-                                    </button>
-                                </form>
-                            </div>
+            <div class="mt-6 space-y-4">
+                @forelse($receivables as $debt)
+                <article class="rounded-[28px] border border-emerald-100 bg-emerald-50/45 p-5">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900">{{ $debt->name }}</h3>
+                            <p class="mt-1 text-sm text-slate-500">{{ $debt->description ?? 'Tanpa catatan tambahan.' }}</p>
+                            @if($debt->due_date)
+                            <p class="mt-3 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                                Jatuh tempo {{ $debt->due_date->format('d M Y') }}
+                            </p>
+                            @endif
                         </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
+                        <div class="text-left lg:text-right">
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Nominal</p>
+                            <p class="mt-2 text-2xl font-black tracking-tight text-emerald-600">Rp {{ number_format($debt->amount, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
 
+                    <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="mt-5 flex flex-col gap-3 border-t border-emerald-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
+                        @csrf
+                        <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Masuk ke wallet</span>
+                        <select name="wallet_id" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:ring-0">
+                            @foreach($wallets as $w)
+                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-600" onclick="return confirm('Yakin {{ $debt->name }} sudah bayar lunas? Saldo akan bertambah.')">
+                            Tandai Lunas
+                        </button>
+                    </form>
+                </article>
+                @empty
+                <div class="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+                    <p class="text-base font-bold text-slate-700">Belum ada piutang aktif</p>
+                    <p class="mt-2 text-sm text-slate-500">Saat ada orang berutang ke Anda, datanya akan muncul di sini.</p>
+                </div>
+                @endforelse
+            </div>
+        </section>
+
+        <section class="app-panel p-6">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-200 pb-5">
+                <div>
+                    <p class="app-eyebrow">Payables</p>
+                    <h2 class="mt-3 text-2xl font-black tracking-tight text-slate-950">Utang saya</h2>
+                    <p class="mt-2 text-sm text-slate-500">Kewajiban yang perlu segera diselesaikan.</p>
+                </div>
+                <span class="rounded-full bg-rose-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.22em] text-rose-700">{{ $payables->count() }} data</span>
+            </div>
+
+            <div class="mt-6 space-y-4">
+                @forelse($payables as $debt)
+                <article class="rounded-[28px] border border-rose-100 bg-rose-50/45 p-5">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900">{{ $debt->name }}</h3>
+                            <p class="mt-1 text-sm text-slate-500">{{ $debt->description ?? 'Tanpa catatan tambahan.' }}</p>
+                            @if($debt->due_date)
+                            <p class="mt-3 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                                Jatuh tempo {{ $debt->due_date->format('d M Y') }}
+                            </p>
+                            @endif
+                        </div>
+                        <div class="text-left lg:text-right">
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Nominal</p>
+                            <p class="mt-2 text-2xl font-black tracking-tight text-rose-500">Rp {{ number_format($debt->amount, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="mt-5 flex flex-col gap-3 border-t border-rose-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
+                        @csrf
+                        <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Ambil dari wallet</span>
+                        <select name="wallet_id" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-300 focus:ring-0">
+                            @foreach($wallets as $w)
+                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-rose-600" onclick="return confirm('Lunasi utang ini sekarang? Saldo akan berkurang.')">
+                            Bayar Lunas
+                        </button>
+                    </form>
+                </article>
+                @empty
+                <div class="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+                    <p class="text-base font-bold text-slate-700">Anda bebas utang</p>
+                    <p class="mt-2 text-sm text-slate-500">Bagus. Area ini akan tetap kosong sampai ada kewajiban baru.</p>
+                </div>
+                @endforelse
+            </div>
+        </section>
     </div>
 </div>
 @endsection

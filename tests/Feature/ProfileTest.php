@@ -57,6 +57,8 @@ test('user can delete their account', function () {
         ->actingAs($user)
         ->delete('/profile', [
             'password' => 'password',
+            'confirmation_text' => 'HAPUS AKUN',
+            'confirm_permanent_delete' => '1',
         ]);
 
     $response
@@ -75,10 +77,30 @@ test('correct password must be provided to delete account', function () {
         ->from('/profile')
         ->delete('/profile', [
             'password' => 'wrong-password',
+            'confirmation_text' => 'HAPUS AKUN',
+            'confirm_permanent_delete' => '1',
         ]);
 
     $response
         ->assertSessionHasErrorsIn('userDeletion', 'password')
+        ->assertRedirect('/profile');
+
+    $this->assertNotNull($user->fresh());
+});
+
+test('delete account requires explicit confirmation text and checkbox', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->from('/profile')
+        ->delete('/profile', [
+            'password' => 'password',
+            'confirmation_text' => 'hapus akun',
+        ]);
+
+    $response
+        ->assertSessionHasErrorsIn('userDeletion', ['confirmation_text', 'confirm_permanent_delete'])
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());

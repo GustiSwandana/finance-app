@@ -20,6 +20,11 @@ class AdminApprovalController extends Controller
     public function approve($id)
     {
         $user = User::findOrFail($id);
+
+        if (! $user->hasVerifiedEmail()) {
+            return back()->with('error', "User {$user->name} belum memverifikasi email.");
+        }
+
         $user->update(['is_active' => true]);
 
         return back()->with('success', "User {$user->name} berhasil disetujui dan sekarang bisa login.");

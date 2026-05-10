@@ -30,12 +30,17 @@ class DebtController extends Controller
             'type' => 'required|in:payable,receivable',
             'name' => 'required|string',
             'amount' => 'required|numeric|min:1000',
-            'wallet_id' => 'required|exists:wallets,id', // Bank yg terlibat
+            'wallet_id' => 'required',
             'due_date' => 'nullable|date',
         ]);
 
-        DB::transaction(function () use ($request) {
-            // 1. Simpan Catatan Utang
+        $wallet = $this->findUserWalletOrFail($request->wallet_id);
+
+        if ($request->type === 'receivable' && $wallet->balance < $request->amount) {
+            return back()->withErrors(['msg' => 'Saldo tidak cukup di dompet ' . $wallet->bank_name])->withInput();
+        }
+
+        DB::transaction(function () use ($request, $wallet) {
             $debt = Debt::create([
                 'user_id' => Auth::id(),
                 'type' => $request->type,
@@ -45,11 +50,7 @@ class DebtController extends Controller
                 'description' => $request->description,
             ]);
 
-            $wallet = Wallet::find($request->wallet_id);
-
-            // 2. Mutasi Saldo Otomatis
             if ($request->type == 'payable') {
-                // SAYA UTANG = Uang Masuk (Income)
                 $wallet->increment('balance', $request->amount);
                 Transaction::create([
                     'user_id' => Auth::id(),
@@ -58,9 +59,9 @@ class DebtController extends Controller
                     'type' => 'income',
                     'date' => now(),
                     'description' => 'Pinjaman dari ' . $request->name,
+                    'status' => 'completed',
                 ]);
             } else {
-                // ORANG UTANG = Uang Keluar (Expense)
                 $wallet->decrement('balance', $request->amount);
                 Transaction::create([
                     'user_id' => Auth::id(),
@@ -69,6 +70,7 @@ class DebtController extends Controller
                     'type' => 'expense',
                     'date' => now(),
                     'description' => 'Pinjamkan ke ' . $request->name,
+                    'status' => 'completed',
                 ]);
             }
         });
@@ -79,13 +81,16 @@ class DebtController extends Controller
     // FUNGSI PELUNASAN
     public function markAsPaid(Request $request, $id)
     {
-        $request->validate(['wallet_id' => 'required|exists:wallets,id']);
+        $request->validate(['wallet_id' => 'required']);
         $debt = Debt::where('user_id', Auth::id())->findOrFail($id);
-        $wallet = Wallet::find($request->wallet_id);
+        $wallet = $this->findUserWalletOrFail($request->wallet_id);
+
+        if ($debt->type === 'payable' && $wallet->balance < $debt->amount) {
+            return back()->withErrors(['msg' => 'Saldo tidak cukup di dompet ' . $wallet->bank_name])->withInput();
+        }
 
         DB::transaction(function () use ($debt, $wallet) {
             if ($debt->type == 'payable') {
-                // SAYA BAYAR UTANG = Pengeluaran
                 $wallet->decrement('balance', $debt->amount);
                 Transaction::create([
                     'user_id' => Auth::id(),
@@ -94,9 +99,9 @@ class DebtController extends Controller
                     'type' => 'expense',
                     'date' => now(),
                     'description' => 'Pelunasan utang ke ' . $debt->name,
+                    'status' => 'completed',
                 ]);
             } else {
-                // ORANG BAYAR KE SAYA = Pemasukan
                 $wallet->increment('balance', $debt->amount);
                 Transaction::create([
                     'user_id' => Auth::id(),
@@ -105,6 +110,7 @@ class DebtController extends Controller
                     'type' => 'income',
                     'date' => now(),
                     'description' => 'Pelunasan piutang dari ' . $debt->name,
+                    'status' => 'completed',
                 ]);
             }
 
@@ -112,5 +118,10 @@ class DebtController extends Controller
         });
 
         return back()->with('success', 'Status lunas! Saldo telah diupdate.');
+    }
+
+    protected function findUserWalletOrFail(int|string $walletId): Wallet
+    {
+        return Wallet::where('user_id', Auth::id())->findOrFail($walletId);
     }
 }

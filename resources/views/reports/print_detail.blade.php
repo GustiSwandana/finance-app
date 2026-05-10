@@ -93,13 +93,11 @@
 <body>
 
     @php
-        $start = request('start_date') ? \Carbon\Carbon::parse(request('start_date')) : now()->startOfMonth();
-        $end   = request('end_date') ? \Carbon\Carbon::parse(request('end_date')) : now();
-        
-        // Hitung Summary
-        $totalIn = $transactions->where('type', 'income')->sum('amount');
-        $totalOut = $transactions->where('type', 'expense')->sum('amount');
-        $net = $totalIn - $totalOut;
+        $start = \Carbon\Carbon::parse($startDate ?? now()->startOfMonth());
+        $end = \Carbon\Carbon::parse($endDate ?? now());
+        $totalIn = $totalIncome ?? $transactions->where('type', 'income')->sum('amount');
+        $totalOut = $totalExpense ?? $transactions->where('type', 'expense')->sum('amount');
+        $net = $netBalance ?? ($totalIn - $totalOut);
     @endphp
 
     <table class="header-table">
@@ -186,8 +184,10 @@
                 <td class="text-right">
                     @if($data->type == 'income')
                         <span class="text-success text-bold">+ Rp {{ number_format($data->amount, 0, ',', '.') }}</span>
-                    @else
+                    @elseif($data->type == 'expense')
                         <span class="text-danger text-bold">- Rp {{ number_format($data->amount, 0, ',', '.') }}</span>
+                    @else
+                        <span class="text-primary text-bold">Rp {{ number_format($data->amount, 0, ',', '.') }}</span>
                     @endif
                 </td>
             </tr>

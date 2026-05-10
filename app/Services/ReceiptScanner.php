@@ -10,24 +10,23 @@ class ReceiptScanner
 {
     public function scan(string $imagePath)
     {
-        $apiKey = trim(env('GEMINI_API_KEY'));
+        $apiKey = trim((string) config('gemini.api_key'));
 
         if (!$apiKey) {
-            Log::error("ReceiptScanner: API Key kosong. Cek .env");
+            Log::error('ReceiptScanner: API Key kosong. Cek konfigurasi Gemini.');
             return null;
         }
 
-        // MODEL TERBARU & PALING STABIL (2025)
         $model = 'gemini-2.0-flash';
-
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+        $baseUrl = rtrim((string) config('gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta'), '/');
+        $timeout = (int) config('gemini.request_timeout', 30);
+        $url = "{$baseUrl}/models/{$model}:generateContent?key={$apiKey}";
 
         if (!file_exists($imagePath)) {
             Log::error("ReceiptScanner: File tidak ditemukan: {$imagePath}");
             return null;
         }
 
-        // Encode gambar
         $mime = mime_content_type($imagePath);
         $base64 = base64_encode(file_get_contents($imagePath));
 
@@ -48,8 +47,7 @@ Pastikan JSON valid dan tidak berisi teks lain.
         ";
 
         try {
-
-            $response = Http::withoutVerifying()
+            $response = Http::timeout($timeout)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($url, [
                     "contents" => [
@@ -75,7 +73,6 @@ Pastikan JSON valid dan tidak berisi teks lain.
             $data = $response->json();
             $raw = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-            // Ambil blok JSON
             if (!preg_match('/\{[\s\S]*\}/', $raw, $match)) {
                 Log::error("ReceiptScanner: AI tidak mengembalikan JSON. Output: {$raw}");
                 return null;

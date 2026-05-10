@@ -6,11 +6,25 @@ use Carbon\Carbon;
 
 class TransactionImportService
 {
-    public function parse(string $text)
+    public function parse(string $text, ?string $bankSource = null)
     {
         // 1. BERSIHKAN TEKS (Hapus karakter yang mengganggu)
         // Hapus tanda kutip ("), Tab (\t), Return (\r)
         $text = str_replace(['"', "\t", "\r"], " ", $text);
+
+        $bankSource = strtolower((string) $bankSource);
+
+        if ($bankSource === 'bca') {
+            return $this->parseBCA($text);
+        }
+
+        if ($bankSource === 'mandiri') {
+            return $this->parseMandiri($text);
+        }
+
+        if ($bankSource === 'bri') {
+            return $this->parseBRI($text);
+        }
         
         // 2. DETEKSI BANK
         $upperText = strtoupper($text);
@@ -27,6 +41,42 @@ class TransactionImportService
         }
         
         return [];
+    }
+
+    public function parseRows(array $rows, ?string $bankSource = null): array
+    {
+        $results = [];
+        $headers = [];
+
+        foreach ($rows as $index => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $row = array_values($row);
+
+            if ($this->rowIsEmpty($row)) {
+                continue;
+            }
+
+            if ($headers === [] && $this->looksLikeHeaderRow($row)) {
+                $headers = $this->normalizeHeaders($row);
+                continue;
+            }
+
+            if ($headers !== []) {
+                $assoc = $this->mapRowToHeaders($headers, $row);
+                $parsed = $this->parseAssociativeRow($assoc, $bankSource);
+            } else {
+                $parsed = $this->parsePositionalRow($row, $bankSource);
+            }
+
+            if ($parsed !== null) {
+                $results[] = $parsed;
+            }
+        }
+
+        return $results;
     }
 
     // ============================================================
@@ -47,6 +97,11 @@ class TransactionImportService
 
         foreach ($blocks as $block) {
             $block = trim($block);
+            $upperBlock = strtoupper($block);
+
+            if ($this->isStatementNoise($upperBlock)) {
+                continue;
+            }
 
             // Pastikan blok ini dimulai dengan tanggal valid (dd/mm/yy)
             // Contoh: 01/12/24 10:52:57 ...
@@ -86,7 +141,7 @@ class TransactionImportService
                 $type = 'expense';
 
                 // Tentukan Tipe Transaksi
-                if ($debet > 0 && $credit == 0) {
+                if ($debet > 0 && $kredit == 0) {
                     $amount = $debet;
                     $type = 'expense'; // Uang Keluar
                 } elseif ($kredit > 0) {
@@ -113,6 +168,7 @@ class TransactionImportService
                     
                     // Hapus ID Teller (Angka 7-9 digit yang berdiri sendiri)
                     $desc = preg_replace('/\b\d{6,9}\b/', '', $desc);
+                    $desc = $this->cleanDescription($desc);
                     
                     // Rapikan spasi
                     $desc = trim(preg_replace('/\s+/', ' ', $desc));
@@ -127,7 +183,7 @@ class TransactionImportService
                     $results[] = [
                         'bank_detected' => 'BRI (BritAma)',
                         'date' => $dateTime,
-                        'description' => $desc,
+                        'description' => $this->truncateDescription($desc),
                         'amount' => $amount,
                         'type' => $type,
                         'category_guess' => $this->guessCategory($desc)
@@ -184,7 +240,7 @@ class TransactionImportService
             $results[] = [
                 'bank_detected' => 'Mandiri (Livin)',
                 'date' => $date,
-                'description' => $desc,
+                'description' => $this->truncateDescription($desc),
                 'amount' => $amount,
                 'type' => $type,
                 'category_guess' => $this->guessCategory($desc)
@@ -221,7 +277,7 @@ class TransactionImportService
                 $results[] = [
                     'bank_detected' => 'BCA',
                     'date' => $date . ' ' . now()->format('H:i:s'),
-                    'description' => $desc,
+                    'description' => $this->truncateDescription($desc),
                     'amount' => $amount,
                     'type' => $type,
                     'category_guess' => $this->guessCategory($desc)
@@ -232,6 +288,288 @@ class TransactionImportService
     }
 
     // --- HELPER ---
+    private function parseAssociativeRow(array $row, ?string $bankSource = null): ?array
+    {
+        $dateRaw = $this->valueFrom($row, ['tanggal', 'date', 'transaction_date', 'tgl', 'posting_date', 'waktu']);
+        $description = $this->valueFrom($row, ['deskripsi', 'description', 'keterangan', 'uraian', 'remark', 'remarks', 'berita']);
+        $debitRaw = $this->valueFrom($row, ['debit', 'debet', 'withdrawal', 'keluar', 'pengeluaran']);
+        $creditRaw = $this->valueFrom($row, ['credit', 'kredit', 'deposit', 'masuk', 'pemasukan']);
+        $amountRaw = $this->valueFrom($row, ['amount', 'nominal', 'jumlah', 'mutasi', 'transaction_amount']);
+        $typeRaw = strtolower($this->valueFrom($row, ['type', 'tipe', 'jenis', 'dk', 'd_k']));
+
+        $debit = $this->parseAmount($debitRaw);
+        $credit = $this->parseAmount($creditRaw);
+        $amount = $this->parseAmount($amountRaw);
+        $type = null;
+
+        if ($credit > 0) {
+            $amount = $credit;
+            $type = 'income';
+        } elseif ($debit > 0) {
+            $amount = $debit;
+            $type = 'expense';
+        } elseif ($amount > 0) {
+            $type = $this->typeFromText($typeRaw . ' ' . $amountRaw);
+        }
+
+        return $this->makeImportedRow($dateRaw, $description, $amount, $type, $bankSource);
+    }
+
+    private function parsePositionalRow(array $row, ?string $bankSource = null): ?array
+    {
+        $dateRaw = null;
+        $descriptionParts = [];
+        $moneyValues = [];
+
+        foreach ($row as $value) {
+            $value = trim((string) $value);
+
+            if ($value === '') {
+                continue;
+            }
+
+            if ($dateRaw === null && $this->parseDate($value) !== null) {
+                $dateRaw = $value;
+                continue;
+            }
+
+            $amount = $this->parseAmount($value);
+            if ($amount > 0) {
+                $moneyValues[] = ['raw' => $value, 'amount' => $amount];
+                continue;
+            }
+
+            $descriptionParts[] = $value;
+        }
+
+        if ($dateRaw === null || $moneyValues === []) {
+            return null;
+        }
+
+        $selected = $moneyValues[0];
+        $type = $this->typeFromText($selected['raw'] . ' ' . implode(' ', $row));
+
+        return $this->makeImportedRow(
+            $dateRaw,
+            implode(' ', $descriptionParts),
+            $selected['amount'],
+            $type,
+            $bankSource
+        );
+    }
+
+    private function makeImportedRow($dateRaw, $description, float $amount, ?string $type, ?string $bankSource = null): ?array
+    {
+        $date = $this->parseDate((string) $dateRaw);
+        $description = trim(preg_replace('/\s+/', ' ', (string) $description));
+        $description = $this->cleanDescription($description);
+
+        if ($date === null || $amount <= 0 || ! in_array($type, ['income', 'expense'], true)) {
+            return null;
+        }
+
+        return [
+            'bank_detected' => $this->bankLabel($bankSource),
+            'date' => $date,
+            'description' => $this->truncateDescription($description !== '' ? $description : 'Mutasi bank'),
+            'amount' => $amount,
+            'type' => $type,
+            'category_guess' => $this->guessCategory($description)
+        ];
+    }
+
+    private function parseDate(string $value): ?string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        $formats = [
+            'Y-m-d H:i:s',
+            'Y-m-d',
+            'd/m/Y H:i:s',
+            'd/m/Y',
+            'd-m-Y H:i:s',
+            'd-m-Y',
+            'd/m/y H:i:s',
+            'd/m/y',
+            'd M Y H:i:s',
+            'd M Y',
+            'd F Y',
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                return Carbon::createFromFormat($format, $value)->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                //
+            }
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function parseAmount($value): float
+    {
+        $value = trim((string) $value);
+
+        if ($value === '' || preg_match('/[A-Za-z]{3,}/', $value)) {
+            return 0.0;
+        }
+
+        $negative = str_contains($value, '-') || preg_match('/^\(.*\)$/', $value);
+        $value = preg_replace('/[^\d,.\-]/', '', $value);
+        $value = trim($value, '-');
+
+        if ($value === '') {
+            return 0.0;
+        }
+
+        $lastComma = strrpos($value, ',');
+        $lastDot = strrpos($value, '.');
+
+        if ($lastComma !== false && $lastDot !== false) {
+            if ($lastComma > $lastDot) {
+                $value = str_replace('.', '', $value);
+                $value = str_replace(',', '.', $value);
+            } else {
+                $value = str_replace(',', '', $value);
+            }
+        } elseif ($lastComma !== false) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
+        } else {
+            $value = str_replace(',', '', $value);
+        }
+
+        $amount = (float) $value;
+
+        return $negative ? abs($amount) : $amount;
+    }
+
+    private function typeFromText(string $value): string
+    {
+        $value = strtoupper($value);
+
+        if (preg_match('/(^|\s|\+)(CR|CREDIT|KREDIT|MASUK|INCOME|IN|SETOR|\+)/', $value)) {
+            return 'income';
+        }
+
+        return 'expense';
+    }
+
+    private function looksLikeHeaderRow(array $row): bool
+    {
+        $text = implode(' ', array_map(fn ($value) => strtolower((string) $value), $row));
+
+        return preg_match('/tanggal|date|deskripsi|description|keterangan|debit|credit|kredit|nominal|amount/', $text) === 1;
+    }
+
+    private function normalizeHeaders(array $row): array
+    {
+        return array_map(function ($value) {
+            $value = strtolower(trim((string) $value));
+            $value = preg_replace('/[^a-z0-9]+/', '_', $value);
+            return trim($value, '_');
+        }, $row);
+    }
+
+    private function mapRowToHeaders(array $headers, array $row): array
+    {
+        $mapped = [];
+
+        foreach ($headers as $index => $header) {
+            if ($header !== '') {
+                $mapped[$header] = $row[$index] ?? null;
+            }
+        }
+
+        return $mapped;
+    }
+
+    private function valueFrom(array $row, array $keys): string
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $row) && trim((string) $row[$key]) !== '') {
+                return trim((string) $row[$key]);
+            }
+        }
+
+        return '';
+    }
+
+    private function rowIsEmpty(array $row): bool
+    {
+        foreach ($row as $value) {
+            if (trim((string) $value) !== '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function cleanDescription(string $description): string
+    {
+        $patterns = [
+            '/\bHALAMAN\s+\d+\s+DARI\s+\d+\b.*$/iu',
+            '/\bPAGE\s+\d+\s+OF\s+\d+\b.*$/iu',
+            '/\bLAPORAN\s+TRANSAKSI\s+FINANSIAL\b.*$/iu',
+            '/\bSTATEMENT\s+OF\s+FINANCIAL\s+TRANSACTION\b.*$/iu',
+            '/\bTERBILANG\s*\/\s*IN\s+WORDS\b.*$/iu',
+            '/\bBIAYA\s+MATERAI\s+TELAH\s+DIBAYAR\b.*$/iu',
+            '/\bREVENUE\s+STAMP\s+PAID\b.*$/iu',
+            '/\bAPABILA\s+TERDAPAT\s+PERBEDAAN\b.*$/iu',
+            '/\bIN\s+THE\s+CASE\s+OF\s+ANY\s+DIFFERENCES\b.*$/iu',
+            '/\bSALINAN\s+REKENING\s+KORAN\b.*$/iu',
+            '/\bTHE\s+COPY\s+OF\s+THIS\s+STATEMENT\b.*$/iu',
+            '/\bCREATED\s+BY\s+BRIMO\b.*$/iu',
+        ];
+
+        foreach ($patterns as $pattern) {
+            $description = preg_replace($pattern, '', $description);
+        }
+
+        return trim(preg_replace('/\s+/', ' ', $description));
+    }
+
+    private function truncateDescription(string $description): string
+    {
+        $description = trim(preg_replace('/\s+/', ' ', $description));
+
+        if ($description === '') {
+            return 'Mutasi bank';
+        }
+
+        return mb_substr($description, 0, 250);
+    }
+
+    private function isStatementNoise(string $upperBlock): bool
+    {
+        return str_contains($upperBlock, 'LAPORAN TRANSAKSI FINANSIAL')
+            || str_contains($upperBlock, 'STATEMENT OF FINANCIAL TRANSACTION')
+            || str_contains($upperBlock, 'TERBILANG / IN WORDS')
+            || str_contains($upperBlock, 'REVENUE STAMP PAID')
+            || str_contains($upperBlock, 'SALINAN REKENING KORAN')
+            || str_contains($upperBlock, 'CREATED BY BRIMO');
+    }
+
+    private function bankLabel(?string $bankSource): string
+    {
+        return match (strtolower((string) $bankSource)) {
+            'bca' => 'BCA',
+            'mandiri' => 'Mandiri',
+            'bri' => 'BRI',
+            default => 'File Mutasi',
+        };
+    }
+
     private function guessCategory($desc)
     {
         $desc = strtoupper($desc);

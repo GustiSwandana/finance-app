@@ -15,13 +15,20 @@ class VerifyEmailController extends Controller
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+            return $this->redirectAfterVerification($request->user());
         }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        return $this->redirectAfterVerification($request->user());
+    }
+
+    private function redirectAfterVerification($user): RedirectResponse
+    {
+        return $user->is_active
+            ? redirect()->intended(route('dashboard', absolute: false).'?verified=1')
+            : redirect()->route('approval.pending')->with('status', 'Email berhasil diverifikasi. Akun Anda masih menunggu persetujuan admin.');
     }
 }

@@ -1,3 +1,346 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --ui-focus: rgba(20, 184, 166, 0.22);
+}
+
+* {
+    letter-spacing: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--ui-focus);
+    outline-offset: 3px;
+}
+
+.app-hero {
+    padding: 1.75rem;
+}
+
+.app-hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+.app-panel {
+    border-radius: 1.75rem;
+    color: rgb(15 23 42);
+}
+
+.dark .app-panel {
+    color: rgb(226 232 240);
+}
+
+.metric-card:not([class*=" p-"]):not([class^="p-"]) {
+    padding: 1.25rem;
+}
+
+.app-shell .app-panel h1,
+.app-shell .app-panel h2,
+.app-shell .app-panel h3,
+.app-shell .app-panel h4 {
+    color: rgb(15 23 42);
+}
+
+.dark .app-shell .app-panel h1,
+.dark .app-shell .app-panel h2,
+.dark .app-shell .app-panel h3,
+.dark .app-shell .app-panel h4 {
+    color: rgb(248 250 252);
+}
+
+.app-shell .app-panel label {
+    color: rgb(51 65 85);
+}
+
+.dark .app-shell .app-panel label {
+    color: rgb(226 232 240);
+}
+
+.app-panel input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.app-panel select,
+.app-panel textarea {
+    min-height: 2.875rem;
+    border-color: rgb(203 213 225);
+    background-color: rgba(248, 250, 252, 0.92);
+    color: rgb(15 23 42);
+    transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.app-panel input::placeholder,
+.app-panel textarea::placeholder {
+    color: rgb(148 163 184);
+}
+
+.dark .app-panel input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.dark .app-panel select,
+.dark .app-panel textarea {
+    border-color: rgb(51 65 85);
+    background-color: rgba(15, 23, 42, 0.78);
+    color: rgb(248 250 252);
+}
+
+.dark .app-panel input::placeholder,
+.dark .app-panel textarea::placeholder {
+    color: rgb(100 116 139);
+}
+
+.app-panel input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.app-panel select:focus,
+.app-panel textarea:focus {
+    border-color: rgb(20 184 166);
+    background-color: rgb(255 255 255);
+    box-shadow: 0 0 0 4px var(--ui-focus);
+}
+
+.dark .app-panel input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.dark .app-panel select:focus,
+.dark .app-panel textarea:focus {
+    background-color: rgb(15 23 42);
+}
+
+.app-panel input[type="file"] {
+    border-color: rgb(203 213 225);
+    background-color: rgba(248, 250, 252, 0.9);
+}
+
+.dark .app-panel input[type="file"] {
+    border-color: rgb(51 65 85);
+    background-color: rgba(15, 23, 42, 0.78);
+    color: rgb(226 232 240);
+}
+
+.app-panel table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.app-panel thead tr,
+.app-panel tbody,
+.app-panel tfoot,
+.app-panel .border-slate-200,
+.app-panel .border-slate-100 {
+    border-color: rgba(203, 213, 225, 0.9);
+}
+
+.dark .app-panel thead tr,
+.dark .app-panel tbody,
+.dark .app-panel tfoot,
+.dark .app-panel .border-slate-200,
+.dark .app-panel .border-slate-100 {
+    border-color: rgba(51, 65, 85, 0.85) !important;
+}
+
+.dark .app-panel .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(51, 65, 85, 0.85) !important;
+}
+
+.dark .app-panel .text-slate-950,
+.dark .app-panel .text-slate-900,
+.dark .app-panel .text-slate-800 {
+    color: rgb(248 250 252) !important;
+}
+
+.dark .app-panel .text-slate-700,
+.dark .app-panel .text-slate-600 {
+    color: rgb(203 213 225) !important;
+}
+
+.dark .app-panel .text-slate-500,
+.dark .app-panel .text-slate-400 {
+    color: rgb(148 163 184) !important;
+}
+
+.dark .app-panel .bg-white,
+.dark .app-panel .bg-slate-50,
+.dark .app-panel .bg-slate-100 {
+    background-color: rgba(15, 23, 42, 0.76) !important;
+}
+
+.dark .app-panel .hover\:bg-white:hover,
+.dark .app-panel .hover\:bg-slate-50:hover,
+.dark .app-panel .hover\:bg-slate-100:hover,
+.dark .app-panel tr:hover {
+    background-color: rgba(30, 41, 59, 0.72) !important;
+}
+
+.app-panel .app-eyebrow {
+    background: rgba(241, 245, 249, 0.92);
+    color: rgb(71 85 105);
+}
+
+.dark .app-panel .app-eyebrow {
+    background: rgba(15, 23, 42, 0.9);
+    color: rgb(203 213 225);
+}
+
+.app-panel .rounded-\[28px\],
+.app-panel .rounded-\[30px\],
+.app-panel .rounded-\[32px\],
+.app-panel .rounded-3xl {
+    border-radius: 1.35rem;
+}
+
+.app-shell .overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+}
+
+.app-shell .overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.app-shell .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.app-shell .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.42);
+    border-radius: 999px;
+}
+
+.layout-wrapper .sidebar-wrapper {
+    left: -308px !important;
+    display: block !important;
+    z-index: 60 !important;
+    width: min(308px, 88vw) !important;
+    transition: left 0.24s ease !important;
+}
+
+.layout-wrapper.active .sidebar-wrapper,
+html.sidebar-desktop-open .layout-wrapper .sidebar-wrapper {
+    left: 0 !important;
+}
+
+.layout-wrapper .sidebar-body {
+    height: calc(100vh - 108px) !important;
+}
+
+.layout-wrapper .body-wrapper,
+.layout-wrapper.active .body-wrapper {
+    margin-left: 0 !important;
+    transition: margin-left 0.24s ease !important;
+}
+
+.layout-wrapper .header-wrapper,
+.layout-wrapper.active .header-wrapper {
+    left: 0 !important;
+    width: 100% !important;
+    transition: left 0.24s ease, width 0.24s ease !important;
+}
+
+.layout-wrapper .body-wrapper .drawer-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.aside-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.46);
+    backdrop-filter: blur(4px);
+}
+
+.layout-wrapper .aside-overlay {
+    display: none !important;
+}
+
+.layout-wrapper.active .aside-overlay:not(.hidden) {
+    display: block !important;
+}
+
+@media (min-width: 1280px) {
+    .layout-wrapper.active .body-wrapper,
+    html.sidebar-desktop-open .layout-wrapper .body-wrapper {
+        margin-left: 308px !important;
+    }
+
+    .layout-wrapper.active .header-wrapper,
+    html.sidebar-desktop-open .layout-wrapper .header-wrapper {
+        left: 308px !important;
+        width: calc(100% - 308px) !important;
+    }
+
+    .layout-wrapper.active .header-wrapper .drawer-btn,
+    html.sidebar-desktop-open .layout-wrapper .header-wrapper .drawer-btn {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .layout-wrapper .aside-overlay,
+    .layout-wrapper.active .aside-overlay,
+    html.sidebar-desktop-open .layout-wrapper .aside-overlay {
+        display: none !important;
+    }
+}
+
+.app-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.app-modal.is-open {
+    display: flex;
+}
+
+.app-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(6px);
+}
+
+.app-modal__panel {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 28rem);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+}
+
+.dark .app-modal__panel {
+    border-color: rgba(51, 65, 85, 0.9);
+    background: rgba(15, 23, 42, 0.98);
+    color: rgb(226 232 240);
+}
+
+@media (max-width: 640px) {
+    .app-hero {
+        padding: 1.35rem;
+    }
+
+    .app-panel {
+        border-radius: 1.25rem;
+    }
+}

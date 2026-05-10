@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class BudgetController extends Controller
 {
@@ -47,15 +48,24 @@ class BudgetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required',
             'amount' => 'required|numeric|min:0'
         ]);
 
-        // Pakai updateOrCreate: Jika sudah ada diupdate, jika belum dibuat baru
+        $category = Category::where('user_id', Auth::id())
+            ->where('type', 'expense')
+            ->find($request->category_id);
+
+        if (! $category) {
+            throw ValidationException::withMessages([
+                'category_id' => 'Kategori anggaran tidak valid.',
+            ]);
+        }
+
         Budget::updateOrCreate(
             [
                 'user_id' => Auth::id(),
-                'category_id' => $request->category_id
+                'category_id' => $category->id
             ],
             [
                 'amount' => $request->amount

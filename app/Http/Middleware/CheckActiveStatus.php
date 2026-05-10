@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth; // <--- PERBAIKAN: Gunakan Facade Auth yang benar
+use Illuminate\Support\Facades\Auth;
 
 class CheckActiveStatus
 {
@@ -16,18 +16,12 @@ class CheckActiveStatus
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Cek jika user sedang login DAN status is_active nya 0 (false)
-        if (Auth::check() && Auth::user()->is_active == 0) {
+        if (Auth::check() && ! Auth::user()->is_active) {
+            if (! Auth::user()->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
 
-            // 1. Paksa Logout
-            Auth::logout();
-
-            // 2. Invalidate Session (Penting untuk keamanan agar sesi benar-benar mati)
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            // 3. Redirect ke halaman login dengan pesan error
-            return redirect()->route('login')->with('error', 'Akun Anda sedang menunggu persetujuan Admin.');
+            return redirect()->route('approval.pending');
         }
 
         return $next($request);
