@@ -12,6 +12,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\WhatsAppTransactionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('/webhooks/whatsapp/transactions', [WhatsAppTransactionController::class, 'store'])
+    ->name('webhooks.whatsapp.transactions');
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -72,7 +76,10 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
 
     Route::get('/debts', [DebtController::class, 'index'])->name('debts.index');
     Route::post('/debts', [DebtController::class, 'store'])->name('debts.store');
+    Route::get('/debts/{id}/edit', [DebtController::class, 'edit'])->name('debts.edit');
+    Route::put('/debts/{id}', [DebtController::class, 'update'])->name('debts.update');
     Route::post('/debts/{id}/pay', [DebtController::class, 'markAsPaid'])->name('debts.pay');
+    Route::delete('/debts/{id}', [DebtController::class, 'destroy'])->name('debts.destroy');
 
     Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
     Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');

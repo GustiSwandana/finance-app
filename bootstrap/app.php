@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => CheckActiveStatus::class,
             'admin' => EnsureUserIsAdmin::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/whatsapp/transactions',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

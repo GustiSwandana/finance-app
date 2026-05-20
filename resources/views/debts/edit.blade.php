@@ -22,6 +22,13 @@
 
             <div class="grid gap-6 md:grid-cols-2">
                 <div>
+                    <label class="mb-2 block text-sm font-bold text-slate-700">Jenis</label>
+                    <select name="type" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0">
+                        <option value="receivable" @selected(old('type', $debt->type) === 'receivable')>Piutang</option>
+                        <option value="payable" @selected(old('type', $debt->type) === 'payable')>Utang</option>
+                    </select>
+                </div>
+                <div>
                     <label class="mb-2 block text-sm font-bold text-slate-700">Nama orang</label>
                     <input type="text" name="name" id="debt-name" value="{{ old('name', $debt->name) }}" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0" required>
                 </div>
@@ -36,13 +43,13 @@
                     <label class="mb-2 block text-sm font-bold text-slate-700">Wallet terkait</label>
                     <select name="wallet_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0">
                         @foreach($wallets as $w)
-                        <option value="{{ $w->id }}" {{ $debt->wallet_id == $w->id ? 'selected' : '' }}>{{ $w->bank_name }} | Saldo {{ number_format($w->balance) }}</option>
+                        <option value="{{ $w->id }}" {{ (int) old('wallet_id', $debt->wallet_id) === $w->id ? 'selected' : '' }}>{{ $w->bank_name }} | Saldo {{ number_format($w->balance) }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
                     <label class="mb-2 block text-sm font-bold text-slate-700">Jatuh tempo</label>
-                    <input type="date" name="due_date" value="{{ $debt->due_date ? $debt->due_date->format('Y-m-d') : '' }}" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0">
+                    <input type="date" name="due_date" value="{{ old('due_date', $debt->due_date ? $debt->due_date->format('Y-m-d') : '') }}" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-800 focus:border-sky-300 focus:bg-white focus:ring-0">
                 </div>
             </div>
 

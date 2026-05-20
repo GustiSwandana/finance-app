@@ -103,6 +103,7 @@
                         <div>
                             <h3 class="text-lg font-black text-slate-900">{{ $debt->name }}</h3>
                             <p class="mt-1 text-sm text-slate-500">{{ $debt->description ?? 'Tanpa catatan tambahan.' }}</p>
+                            <p class="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">Wallet: {{ $debt->wallet->bank_name ?? 'Belum tercatat' }}</p>
                             @if($debt->due_date)
                             <p class="mt-3 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
                                 Jatuh tempo {{ $debt->due_date->format('d M Y') }}
@@ -115,18 +116,28 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="mt-5 flex flex-col gap-3 border-t border-emerald-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
-                        @csrf
-                        <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Masuk ke wallet</span>
-                        <select name="wallet_id" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:ring-0">
-                            @foreach($wallets as $w)
-                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-600" onclick="return confirm('Yakin {{ $debt->name }} sudah bayar lunas? Saldo akan bertambah.')">
-                            Tandai Lunas
-                        </button>
-                    </form>
+                    <div class="mt-5 flex flex-col gap-3 border-t border-emerald-100 pt-4">
+                        <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                            @csrf
+                            <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Masuk ke wallet</span>
+                            <select name="wallet_id" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-emerald-300 focus:ring-0">
+                                @foreach($wallets as $w)
+                                <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-600" onclick="return confirm('Yakin {{ $debt->name }} sudah bayar lunas? Saldo akan bertambah.')">
+                                Tandai Lunas
+                            </button>
+                        </form>
+                        <div class="flex justify-end gap-2">
+                            <a href="{{ route('debts.edit', $debt->id) }}" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-50">Edit</a>
+                            <form action="{{ route('debts.destroy', $debt->id) }}" method="POST" onsubmit="return confirm('Hapus piutang ini? Saldo akan disesuaikan kembali jika belum lunas.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-600 transition hover:bg-rose-100">Hapus</button>
+                            </form>
+                        </div>
+                    </div>
                 </article>
                 @empty
                 <div class="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
@@ -154,6 +165,7 @@
                         <div>
                             <h3 class="text-lg font-black text-slate-900">{{ $debt->name }}</h3>
                             <p class="mt-1 text-sm text-slate-500">{{ $debt->description ?? 'Tanpa catatan tambahan.' }}</p>
+                            <p class="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-rose-700">Wallet: {{ $debt->wallet->bank_name ?? 'Belum tercatat' }}</p>
                             @if($debt->due_date)
                             <p class="mt-3 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
                                 Jatuh tempo {{ $debt->due_date->format('d M Y') }}
@@ -166,18 +178,28 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="mt-5 flex flex-col gap-3 border-t border-rose-100 pt-4 sm:flex-row sm:items-center sm:justify-end">
-                        @csrf
-                        <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Ambil dari wallet</span>
-                        <select name="wallet_id" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-300 focus:ring-0">
-                            @foreach($wallets as $w)
-                            <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-rose-600" onclick="return confirm('Lunasi utang ini sekarang? Saldo akan berkurang.')">
-                            Bayar Lunas
-                        </button>
-                    </form>
+                    <div class="mt-5 flex flex-col gap-3 border-t border-rose-100 pt-4">
+                        <form action="{{ route('debts.pay', $debt->id) }}" method="POST" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                            @csrf
+                            <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Ambil dari wallet</span>
+                            <select name="wallet_id" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 focus:border-rose-300 focus:ring-0">
+                                @foreach($wallets as $w)
+                                <option value="{{ $w->id }}">{{ $w->bank_name }}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-rose-600" onclick="return confirm('Lunasi utang ini sekarang? Saldo akan berkurang.')">
+                                Bayar Lunas
+                            </button>
+                        </form>
+                        <div class="flex justify-end gap-2">
+                            <a href="{{ route('debts.edit', $debt->id) }}" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-50">Edit</a>
+                            <form action="{{ route('debts.destroy', $debt->id) }}" method="POST" onsubmit="return confirm('Hapus utang ini? Saldo akan disesuaikan kembali jika belum lunas.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-600 transition hover:bg-rose-100">Hapus</button>
+                            </form>
+                        </div>
+                    </div>
                 </article>
                 @empty
                 <div class="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">

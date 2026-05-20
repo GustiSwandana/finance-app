@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'whatsapp_transactions' => [
+        'token' => env('WHATSAPP_TRANSACTION_WEBHOOK_TOKEN'),
+    ],
+
 ];
